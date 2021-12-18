@@ -5,9 +5,8 @@ import org.springframework.web.bind.annotation.{RequestMapping, RestController}
 
 @RestController
 @RequestMapping(path = Array("/"))
-class TestController{
+class TestController:
   @Autowired var bean: TestBean = null
 
   @RequestMapping(path = Array("/"))
   def home = bean
-}

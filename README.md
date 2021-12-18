@@ -6,12 +6,21 @@
 * Add the `spring-boot-scala-lib` artifact to `ivyDeps`, which
   * Enable Scala class properties and class getter/setter as Spring bean properties
 
+# Usage
+
+In your `build.sc`:
+```scala
+import $ivy.`com.wiwiwa::millSpringBoot:0.1`, com.wiwiwa.springboot.SpringBootScalaModule
+object springTest extends SpringBootScalaModule {
+  override def scalaVersion = "2.13.7"
+  ...
+}
+```
+
 # Development
 
+To test building and running a Spring Boot fat jar
 ```bash
-## To Test
-# build a fat jar
-$ ./mill millSpringBoot.test
-# run fat jar. This will start the test Spring application
-$  java -jar millPlugin/test/out/springTest/assembly/overriden/mill/scalalib/JavaModule/assembly/dest/out.jar
+$ ./mill show millSpringBoot.testJar.assembly
+$ java -jar out/millSpringBoot/testJar/assembly/overriden/mill/scalalib/JavaModule/assembly/dest/out.jar
 ```

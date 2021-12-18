@@ -5,6 +5,5 @@ import org.springframework.stereotype.Component
 import java.util.Date
 
 @Component
-class TestBean {
+class TestBean:
   def msg = s"hello at ${new Date()}"
-}
