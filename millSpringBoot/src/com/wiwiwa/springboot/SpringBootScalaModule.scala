@@ -1,8 +1,8 @@
-package com.wiwiwa.scala.spring
+package com.wiwiwa.springboot
 
-import mill._
 import mill.modules.Assembly.Rule
 import mill.scalalib.ScalaModule
+import mill._
 
 import java.net.URLClassLoader
 import java.util.Properties
