@@ -3,7 +3,6 @@ package com.wiwiwa.springboot
 import com.wiwiwa.mill.ScalaAppModule
 import mill._
 import mill.modules.Assembly.Rule
-import mill.scalalib.ScalaModule
 
 import java.net.URLClassLoader
 import java.util.Properties
@@ -16,7 +15,7 @@ import scala.util.Using
  * + mill `assembly` command can build a Spring Boot fat jar
  * + Scala class can be used as Spring beans
  */
-trait SpringBootScalaModule extends ScalaModule with ScalaAppModule {
+trait SpringBootScalaModule extends ScalaAppModule {
   override def assembly = T {
     springFactories()
     super.assembly()

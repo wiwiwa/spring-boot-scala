@@ -1,4 +1,4 @@
-import $ivy.`com.wiwiwa::millSpringBoot:0.1`, com.wiwiwa.springboot.SpringBootScalaModule
+import $ivy.`com.wiwiwa::millSpringBoot:0.5`, com.wiwiwa.springboot.SpringBootScalaModule, com.wiwiwa.mill.ScalaAppModule
 import mill._
 import mill.scalalib.TestModule.Utest
 import mill.scalalib._
@@ -13,14 +13,13 @@ val defaultPom = PomSettings(
   developers = Seq()
 )
 
-object millSpringBoot extends ScalaModule with PublishModule{
+object millSpringBoot extends ScalaAppModule with PublishModule{
   def scalaVersion = "2.13.7"
-  def publishVersion = "0.1"
   def pomSettings = defaultPom.copy(
     description="A mill plugin that can build Spring application with Scala"
   )
 
-  override def ivyDeps ={
+  override def compileIvyDeps ={
     val millVersion = classOf[JavaModule].getResource(classOf[JavaModule].getSimpleName+".class")
       .getPath.replaceFirst(raw"^.*[/\-]([\d.]+)(\.jar)?!.*","$1")
     Agg(
@@ -29,7 +28,10 @@ object millSpringBoot extends ScalaModule with PublishModule{
   }
 
   object test extends Tests with Utest {
-    override def ivyDeps = Agg( ivy"com.lihaoyi::utest:0.7.10" )
+    override def ivyDeps = Agg(
+      ivy"com.lihaoyi::utest:0.7.10",
+      ivy"com.lihaoyi::mill-scalalib:0.9.9",
+    )
   }
 
   object testJar extends SpringBootScalaModule{
@@ -40,6 +42,8 @@ object millSpringBoot extends ScalaModule with PublishModule{
 //      ivy"org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion",
     )
     override def mainClass = Some("com.wiwiwa.mill.spring.test.TestSpringBootApplication")
+
+    override def pomSettings = defaultPom
   }
 }
 
