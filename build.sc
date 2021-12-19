@@ -1,5 +1,6 @@
 import $ivy.`com.wiwiwa::millSpringBoot:0.1`, com.wiwiwa.springboot.SpringBootScalaModule
 import mill._
+import mill.scalalib.TestModule.Utest
 import mill.scalalib._
 import mill.scalalib.publish.{License, PomSettings, VersionControl}
 
@@ -25,6 +26,10 @@ object millSpringBoot extends ScalaModule with PublishModule{
     Agg(
       ivy"com.lihaoyi::mill-scalalib:$millVersion",
     )
+  }
+
+  object test extends Tests with Utest {
+    override def ivyDeps = Agg( ivy"com.lihaoyi::utest:0.7.10" )
   }
 
   object testJar extends SpringBootScalaModule{

@@ -4,9 +4,8 @@ import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 
 @SpringBootApplication
-class TestSpringBootApplication
+class TestSpringBootJar
 
-object TestSpringBootApplication:
+object TestSpringBootJar:
   def main(args:Array[String]): Unit =
-    SpringApplication.run(classOf[TestSpringBootApplication], args:_*)
-
+    SpringApplication.run(classOf[TestSpringBootJar], args:_*)

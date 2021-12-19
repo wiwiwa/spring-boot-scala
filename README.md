@@ -12,15 +12,17 @@ In your `build.sc`:
 ```scala
 import $ivy.`com.wiwiwa::millSpringBoot:0.1`, com.wiwiwa.springboot.SpringBootScalaModule
 object springTest extends SpringBootScalaModule {
-  override def scalaVersion = "2.13.7"
+  override def scalaVersion = "3.1.0"
   ...
 }
 ```
 
 # Development
 
-To test building and running a Spring Boot fat jar
 ```bash
-$ ./mill show millSpringBoot.testJar.assembly
+# To test
+$ ./millw millSpringBoot.test
+# To test building and running a Spring Boot fat jar
+$ ./millw show millSpringBoot.testJar.assembly
 $ java -jar out/millSpringBoot/testJar/assembly/overriden/mill/scalalib/JavaModule/assembly/dest/out.jar
 ```
