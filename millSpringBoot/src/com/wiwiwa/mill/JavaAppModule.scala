@@ -1,6 +1,6 @@
 package com.wiwiwa.mill
 
-import ammonite.ops.%%
+import ammonite.ops._
 import mill.T
 import mill.scalalib.PublishModule
 
@@ -22,17 +22,23 @@ trait JavaAppModule extends PublishModule {
 
   def applicationVersion = T.input {
     implicit val pwd = millSourcePath / os.up
-    val isClean = %%.git('status).out.lines.last.endsWith(" clean")
     val GitLog = """(?s)(.*?)\btag:\s+([^.]+)\.(\d*)([^)]*).*""".r
-    val version = %%.git("log","--decorate").out.string match {
+    %%.git("log","--decorate").out.string match {
       case GitLog(prefix, vLeft, vMinor, vRight) =>
+        val isClean = %%.git('status).out.lines.last.endsWith(" clean")
         val isHead = !prefix.contains("\n")
-        val minor = if(isHead && isClean) vMinor.toInt else vMinor.toInt+1
-        s"$vLeft.${minor}$vRight"
+        val version = {
+          val minor = if(isHead && isClean) vMinor.toInt else vMinor.toInt+1
+          s"$vLeft.${minor}$vRight"
+        }
+        if(isClean && !isHead) {
+          println(s"Adding new git tag: $version")
+          %.git("tag", version)
+        }
+        val snapshot = if(isClean) "" else "-SNAPSHOT"
+        s"$version$snapshot"
       case _ => throw new IllegalStateException("A git tag not found in format for xxx.yyy")
     }
-    val snapshot = if(isClean) "" else "-SNAPSHOT"
-    s"$version$snapshot"
   }
 
   override def publishVersion = T {

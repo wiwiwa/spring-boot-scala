@@ -1,4 +1,4 @@
-import $ivy.`com.wiwiwa::millSpringBoot:0.5`, com.wiwiwa.springboot.SpringBootScalaModule, com.wiwiwa.mill.ScalaAppModule
+import $ivy.`com.wiwiwa::mill-spring-boot:0.6`, com.wiwiwa.springboot.SpringBootScalaModule, com.wiwiwa.mill.ScalaAppModule
 import mill._
 import mill.scalalib.TestModule.Utest
 import mill.scalalib._
