@@ -3,9 +3,11 @@ package com.wiwiwa.springboot
 import com.wiwiwa.mill.ScalaAppModule
 import mill._
 import mill.modules.Assembly.Rule
+import mill.scalalib.DepSyntax
 
 import java.net.URLClassLoader
 import java.util.Properties
+import java.util.jar.{Attributes, JarFile}
 import scala.jdk.CollectionConverters._
 import scala.util.Using
 
@@ -16,6 +18,16 @@ import scala.util.Using
  * + Scala class can be used as Spring beans
  */
 trait SpringBootScalaModule extends ScalaAppModule {
+  override def ivyDeps = T{
+    val springBootScalaVersion = {
+      val clazz = classOf[SpringBootScalaModule]
+      val jar = clazz.getResource(clazz.getSimpleName+".class")
+        .getPath.replaceFirst("""file:(.*)!.*""", "$1")
+      new JarFile(jar).getManifest.getMainAttributes.get(new Attributes.Name("ApplicationVersion"))
+    }
+    Agg(ivy"com.wiwiwa::spring-boot-scala:$springBootScalaVersion")
+  }
+
   override def assembly = T {
     springFactories()
     super.assembly()

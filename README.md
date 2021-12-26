@@ -28,4 +28,7 @@ $ ./millw millSpringBoot.test
 # To test building and running a Spring Boot fat jar
 $ ./millw show millSpringBoot.testJar.assembly
 $ java -jar out/millSpringBoot/testJar/assembly/overriden/mill/scalalib/JavaModule/assembly/dest/out.jar
+# To run demo
+$ cd springBootScala/test
+$ ../../millw demo
 ```

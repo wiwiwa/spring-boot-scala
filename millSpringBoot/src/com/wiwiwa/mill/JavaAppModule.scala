@@ -2,7 +2,8 @@ package com.wiwiwa.mill
 
 import ammonite.ops._
 import mill.T
-import mill.scalalib.PublishModule
+import mill.scalalib.JavaModule
+import mill.scalalib.publish.{PomSettings, VersionControl}
 
 import scala.util.matching.Regex.Groups
 
@@ -10,7 +11,11 @@ import scala.util.matching.Regex.Groups
  * With this module, the following features are enabled:
  * + `publishVersion`: auto versioning based on git tag`
  */
-trait JavaAppModule extends PublishModule {
+trait JavaAppModule extends JavaModule {
+  def appDescription = ""
+  def appUrl = ""
+  def organization: String = ???
+
   override def artifactId = T {
     raw"([A-Z])([^A-Z])".r
       .replaceAllIn(super.artifactId(), {
@@ -41,13 +46,21 @@ trait JavaAppModule extends PublishModule {
     }
   }
 
-  override def publishVersion = T {
-    applicationVersion()
-  }
-
   override def manifest = T {
     super.manifest().add(
       "ApplicationVersion" -> publishVersion(),
     )
+  }
+
+  def pomSettings = T{ PomSettings(
+    description=appDescription,
+    organization=organization,
+    url=appUrl,
+    licenses=Seq(),
+    versionControl = VersionControl(Some(appUrl), None, None, None),
+    developers = Seq()
+  ) }
+  def publishVersion = T {
+    applicationVersion()
   }
 }
