@@ -30,8 +30,13 @@ object springBootScala extends ScalaAppModule with PublishModule {
   )
 
   object test extends Tests with TestModule.Utest {
+    val springBootVersion = "2.6.1"
     override def ivyDeps = T{ springBootScala.compileIvyDeps() ++ Seq(
       ivy"com.lihaoyi::utest:0.7.10",
+      ivy"org.springframework.boot:spring-boot-starter-web:$springBootVersion",
+      ivy"org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion",
+      ivy"com.h2database:h2:1.4.200",
+      ivy"javax.xml.bind:jaxb-api:2.3.1",
     ) }
   }
 }
