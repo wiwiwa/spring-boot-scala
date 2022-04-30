@@ -19,12 +19,8 @@ import scala.util.Using
  */
 trait SpringBootScalaModule extends ScalaAppModule {
   override def ivyDeps = T{
-    val springBootScalaVersion = {
-      val clazz = classOf[SpringBootScalaModule]
-      val jar = clazz.getResource(clazz.getSimpleName+".class")
-        .getPath.replaceFirst("""file:(.*)!.*""", "$1")
-      new JarFile(jar).getManifest.getMainAttributes.get(new Attributes.Name("ApplicationVersion"))
-    }
+    var springBootScalaVersion = classOf[SpringBootScalaModule].getPackage.getImplementationVersion
+    if(springBootScalaVersion==null) springBootScalaVersion = "0.11"
     Agg(ivy"com.wiwiwa::spring-boot-scala:$springBootScalaVersion")
   }
 

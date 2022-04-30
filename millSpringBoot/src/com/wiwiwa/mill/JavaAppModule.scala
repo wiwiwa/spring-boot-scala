@@ -47,7 +47,7 @@ trait JavaAppModule extends JavaModule {
 
   override def manifest = T {
     super.manifest().add(
-      "ApplicationVersion" -> publishVersion(),
+      "Implementation-Version" -> publishVersion(),
     )
   }
 

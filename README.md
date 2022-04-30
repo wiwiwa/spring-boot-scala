@@ -10,7 +10,7 @@
 
 In your `build.sc`:
 ```scala
-import $ivy.`com.wiwiwa::millSpringBoot:0.1`, com.wiwiwa.springboot.SpringBootScalaModule
+import $ivy.`com.wiwiwa::millSpringBoot:0.11`, com.wiwiwa.springboot.SpringBootScalaModule
 object springTest extends SpringBootScalaModule {
   override def scalaVersion = "3.1.0"
   ...
