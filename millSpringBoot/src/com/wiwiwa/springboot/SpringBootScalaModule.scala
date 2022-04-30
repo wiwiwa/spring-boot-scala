@@ -33,9 +33,7 @@ trait SpringBootScalaModule extends ScalaAppModule {
     super.assembly()
   }
 
-  override def javacOptions = T {
-    Seq("-parameters")
-  }
+  override def javacOptions = Seq("-parameters")
 
   override def assemblyRules = super.assemblyRules ++ Agg(
     Rule.Append("META-INF/spring.handlers", "\n"),

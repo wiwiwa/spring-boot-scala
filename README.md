@@ -21,14 +21,14 @@ object springTest extends SpringBootScalaModule {
 
 ```bash
 # To generate Idea project files
-./millw mill.scalalib.GenIdea/idea
+./mill mill.scalalib.GenIdea/idea
 
 # To test
-$ ./millw millSpringBoot.test
+$ ./mill millSpringBoot.test
 # To test building and running a Spring Boot fat jar
-$ ./millw show millSpringBoot.testJar.assembly
+$ ./mill show millSpringBoot.testJar.assembly
 $ java -jar out/millSpringBoot/testJar/assembly/overriden/mill/scalalib/JavaModule/assembly/dest/out.jar
 # To run demo
 $ cd springBootScala/test
-$ ../../millw demo
+$ ../../mill demo
 ```

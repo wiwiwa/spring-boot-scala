@@ -1,26 +1,22 @@
-import $ivy.`com.wiwiwa::mill-spring-boot:0.8`
+import $ivy.`com.wiwiwa::mill-spring-boot:0.11`
 import com.wiwiwa.mill.ScalaAppModule
 import mill._
-import mill.api._
 import mill.scalalib._
-
-val springBootVersion = "2.6.1"
 
 object millSpringBoot extends ScalaAppModule with PublishModule {
   def scalaVersion = "2.13.7"
-  def organization = "com.wiwiwa"
+  override def organization = "com.wiwiwa"
 
   override def compileIvyDeps ={
     val millVersion = classOf[JavaModule].getResource(classOf[JavaModule].getSimpleName+".class")
       .getPath.replaceFirst(raw"^.*[/\-]([\d.]+)(\.jar)?!.*","$1")
     Agg(ivy"com.lihaoyi::mill-scalalib:$millVersion")
   }
-  override def moduleDeps = Seq(springBootScala)
 }
 
 object springBootScala extends ScalaAppModule with PublishModule {
   def scalaVersion = "3.1.0"
-  def organization = millSpringBoot.organization
+  override def organization = millSpringBoot.organization
 
   override def ivyDeps = Agg(
     ivy"com.fasterxml.jackson.module::jackson-module-scala:2.13.1",

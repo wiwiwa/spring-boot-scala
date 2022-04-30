@@ -1,8 +1,7 @@
 package com.wiwiwa.mill
 
-import ammonite.ops._
-import mill.T
-import mill.scalalib.JavaModule
+import mill._
+import mill.scalalib._
 import mill.scalalib.publish.{PomSettings, VersionControl}
 
 import scala.util.matching.Regex.Groups
@@ -26,11 +25,11 @@ trait JavaAppModule extends JavaModule {
   }
 
   def applicationVersion = T.input {
-    implicit val pwd = millSourcePath / os.up
+    implicit val pwd: os.Path = millSourcePath / os.up
     val GitLog = """(?s)(.*?)\btag:\s+([^.]+)\.(\d*)([^)]*).*""".r
-    %%.git("log","--decorate").out.string match {
+    os.proc("git","log","--decorate").call().out.text match {
       case GitLog(prefix, vLeft, vMinor, vRight) =>
-        val isClean = %%.git('status).out.lines.last.endsWith(" clean")
+        val isClean = os.proc("git","status").call().out.lines.last.endsWith(" clean")
         val isHead = !prefix.contains("\n")
         val version = {
           val minor = if(isHead && isClean) vMinor.toInt else vMinor.toInt+1
@@ -38,7 +37,7 @@ trait JavaAppModule extends JavaModule {
         }
         if(isClean && !isHead) {
           println(s"Adding new git tag: $version")
-          %.git("tag", version)
+          os.proc("git","tag", version)
         }
         val snapshot = if(isClean) "" else "-SNAPSHOT"
         s"$version$snapshot"
