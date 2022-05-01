@@ -2,7 +2,9 @@
 
 `SpringBootScalaModule` is a mill plugin which:
 * Build Spring Boot application as a fat Jar using `mill`
-* Auto increase version number when building jar or publishing artifacts
+* Auto naming artifact to be publshed
+  * Auto increase version number when building jar or publishing artifacts
+  * Publish project `AbcDef` as artifact `abc-def`
 * Add the `spring-boot-scala-lib` artifact to `ivyDeps`, which
   * Enable Scala class properties and class getter/setter as Spring bean properties
 
@@ -31,4 +33,6 @@ $ java -jar out/millSpringBoot/testJar/assembly/overriden/mill/scalalib/JavaModu
 # To run demo
 $ cd springBootScala/test
 $ ../../mill demo
+# to release
+$ ./mill _.publishLocal
 ```

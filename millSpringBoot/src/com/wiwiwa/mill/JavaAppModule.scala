@@ -16,10 +16,11 @@ trait JavaAppModule extends JavaModule {
   def organization: String = ???
 
   override def artifactId = T {
-    raw"([A-Z])([^A-Z])".r
+    raw"(^|[^A-Z])([A-Z])".r
       .replaceAllIn(super.artifactId(), {
         _ match {
-          case Groups(a, b) => s"-${a.toLowerCase}$b"
+          case Groups("", upper) => upper.toLowerCase
+          case Groups(a, upper) => s"$a-${upper.toLowerCase}"
         }
       })
   }
