@@ -3,12 +3,14 @@ package com.wiwiwa.mill
 import ammonite.main.Defaults
 import ammonite.util.Colors
 import com.wiwiwa.springboot.SpringBootScalaModule
+import mill.{Agg, T}
 import mill.api.Result.{Exception, Failure, Success}
-import mill.Agg
-import mill.define.{BasePath, Caller, Ctx, ExternalModule, Segments, Task}
+import mill.define.{BasePath, Caller, Ctx, ExternalModule, Segments, Target, Task}
 import mill.eval.{Evaluator, EvaluatorPaths}
 import mill.moduledefs.Cacher
+import mill.scalalib.DepSyntax
 import mill.util.PrintLogger
+import org.springframework.boot.SpringApplication
 import sourcecode.Name
 import utest._
 
@@ -17,7 +19,7 @@ object MillSpringBootTest extends TestSuite with Cacher {
   val testApp = createModule()
 
   override def tests = Tests{
-    val ret = testApp.manifest.value
+    val ret = testApp.assembly.value
     assert( ret != null )
   }
 
@@ -31,6 +33,10 @@ object MillSpringBootTest extends TestSuite with Cacher {
       override def scalaVersion = "3.1.0"
       override def organization = this.getClass.getPackageName
       override def mainClass = Some("DummyMain")
+      override def ivyDeps = T{
+        val springBootVersion = classOf[SpringApplication].getPackage.getImplementationVersion
+        Agg(ivy"org.springframework.boot:spring-boot-starter-web:$springBootVersion")
+      }
     }
   }
 

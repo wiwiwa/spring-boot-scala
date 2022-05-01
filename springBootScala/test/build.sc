@@ -1,4 +1,4 @@
-import $ivy.`com.wiwiwa::mill-spring-boot:0.11`
+import $ivy.`com.wiwiwa::mill-spring-boot:SNAPSHOT`
 import com.wiwiwa.springboot.SpringBootScalaModule
 import mill._
 import mill.scalalib._
@@ -6,7 +6,7 @@ import os.Path
 
 object demo extends SpringBootScalaModule {
   def scalaVersion = "3.1.0"
-  val springBootVersion = "2.6.1"
+  val springBootVersion = "2.6.7"
 
   override def ivyDeps = T{ super.ivyDeps() ++ Seq(
     ivy"com.lihaoyi::utest:0.7.10",

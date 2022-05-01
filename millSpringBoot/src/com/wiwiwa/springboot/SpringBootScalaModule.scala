@@ -2,12 +2,12 @@ package com.wiwiwa.springboot
 
 import com.wiwiwa.mill.ScalaAppModule
 import mill._
-import mill.modules.Assembly.Rule
+import mill.modules.Jvm
 import mill.scalalib.DepSyntax
 
-import java.net.URLClassLoader
-import java.util.Properties
-import java.util.jar.{Attributes, JarFile}
+import java.io.{ByteArrayInputStream, File, FileInputStream, FileOutputStream, InputStream}
+import java.util.zip.{CRC32, ZipEntry, ZipFile, ZipOutputStream}
+import scala.collection.immutable.HashSet
 import scala.jdk.CollectionConverters._
 import scala.util.Using
 
@@ -18,40 +18,137 @@ import scala.util.Using
  * + Scala class can be used as Spring beans
  */
 trait SpringBootScalaModule extends ScalaAppModule {
-  override def ivyDeps = T{
+  override def mandatoryIvyDeps = T{
     var springBootScalaVersion = classOf[SpringBootScalaModule].getPackage.getImplementationVersion
     if(springBootScalaVersion==null) springBootScalaVersion = "0.11"
-    Agg(ivy"com.wiwiwa::spring-boot-scala:$springBootScalaVersion")
+    super.mandatoryIvyDeps() ++ Agg(
+      ivy"com.wiwiwa::spring-boot-scala:$springBootScalaVersion",
+    )
   }
-
-  override def assembly = T {
-    springFactories()
-    super.assembly()
-  }
-
   override def javacOptions = Seq("-parameters")
 
-  override def assemblyRules = super.assemblyRules ++ Agg(
-    Rule.Append("META-INF/spring.handlers", "\n"),
-  )
-
-  def springFactories = T {
-    val target = compile().classes.path / "META-INF" / "spring.factories"
-    val classPath = compileClasspath()
-      .map(_.path.toIO.toURI.toURL)
-      .iterator.toArray
-    val text = new URLClassLoader(classPath)
-      .getResources("META-INF/spring.factories").asScala
-      .map(_.openStream)
-      .map(Using(_) { f => val p = new Properties(); p.load(f); p })
-      .flatMap(_.get.asScala)
-      .flatMap { case (k, v) => v.split(',').map(k -> _) }
-      .iterator.toSeq
-      .groupMap(_._1)(_._2).view
-      .mapValues(_.mkString(","))
-      .map { case (k, v) => s"$k=$v" }
-      .mkString("\n")
-    os.write.over(target, text, createFolders = true)
-    target
+  override def assembly = T {
+    val jar = T.dest / "out.jar"
+    Using.resource(new BootJar(jar.toIO)){ jar=>
+      //write MANIFEST
+      val manifest = s"""Manifest-Version: 1.0,
+                       |Implementation-Version: ${publishVersion()}
+                       |Main-Class: org.springframework.boot.loader.JarLauncher
+                       |Start-Class: ${finalMainClass()}
+                       |Spring-Boot-Version: $compileSpringBootVersion
+                       |Spring-Boot-Classes: BOOT-INF/classes/
+                       |Spring-Boot-Lib: BOOT-INF/lib/
+                       |Spring-Boot-Classpath-Index: BOOT-INF/classpath.idx
+                       |Spring-Boot-Layers-Index: BOOT-INF/layers.idx
+                       |""".stripMargin
+      jar.save("META-INF/MANIFEST.MF", manifest)
+      //write spring-boot-loader
+      val loaderJar = new ZipFile( resolveDeps(ivySpringBootLoader)().iterator.next.path.toIO )
+      Using.resource(loaderJar) { _=>
+        loaderJar.entries.asScala
+          .filter(!_.getName.startsWith("META-INF/"))
+          .filter(!_.getName.endsWith("/"))
+          .foreach{ e=> Using.resource(loaderJar.getInputStream(e)) {
+            jar.save(e, _)
+          } }
+      }
+      //write ivy libs
+      val layerTools = resolveDeps(ivySpringBootJarmodeLayerTools)()
+      (resolvedIvyDeps() ++ layerTools).iterator
+        .map(_.path.toIO)
+        .foreach{ f=> jar.save(s"BOOT-INF/lib/${f.getName}", f) }
+      //write class files
+      localClasspath().map(_.path.toIO)
+        .foreach{ f=> jar.save(s"BOOT-INF/${f.getName}", f) }
+      //write idx files
+      val classpath = resolvedIvyDeps().iterator
+        .map(_.path.toIO.getName).map{s=>s"- \"BOOT-INF/lib/$s\""}
+        .mkString("\n") + "\n"
+      jar.save("BOOT-INF/classpath.idx", classpath)
+      val layerIdx = """- "dependencies":
+                       |  - "BOOT-INF/lib/"
+                       |- "spring-boot-loader":
+                       |  - "org/"
+                       |- "snapshot-dependencies":
+                       |- "application":
+                       |  - "BOOT-INF/classes/"
+                       |  - "BOOT-INF/classpath.idx"
+                       |  - "BOOT-INF/layers.idx"
+                       |  - "META-INF/"
+                       |""".stripMargin
+      jar.save("BOOT-INF/layers.idx", layerIdx)
+    }
+    PathRef(jar)
   }
+  def ivySpringBootLoader = T{ Agg(ivy"org.springframework.boot:spring-boot-loader:${compileSpringBootVersion()}") }
+  def ivySpringBootJarmodeLayerTools = T{ Agg(ivy"org.springframework.boot:spring-boot-jarmode-layertools:${compileSpringBootVersion()}") }
+  def compileSpringBootVersion = T{
+    val depToJavaDep = resolveCoursierDependency().apply(_)
+    val deps = transitiveIvyDeps()
+    val (_, resolution) = Jvm.resolveDependenciesMetadata(
+      repositoriesTask(),
+      deps.map(depToJavaDep),
+      deps.filter(!_.force).map(depToJavaDep),
+      None, None)
+    resolution.dependencies
+      .find{d=> d.module.organization.value=="org.springframework.boot" && d.module.name.value=="spring-boot"}
+      .map(_.version).get
+  }
+}
+
+class BootJar(zip:ZipOutputStream) extends AutoCloseable{
+  var directories = HashSet.empty[String]
+
+  def this(file:File) = this{ new ZipOutputStream(new FileOutputStream(file)) }
+
+  def save(entry:ZipEntry, data:InputStream): Unit = {
+    def saveParentDir(entryPath:String): Unit = {
+      val parent = entryPath.lastIndexOf('/', entryPath.length-2) match {
+        case -1 => return
+        case pos => entryPath.substring(0,pos+1)
+      }
+      if(directories.contains(parent))
+        return
+      saveParentDir(parent)
+      directories += parent
+      zip.putNextEntry(new ZipEntry(parent))
+    }
+    saveParentDir(entry.getName)
+    zip.putNextEntry(entry)
+    data.transferTo(zip)
+  }
+  def save(entryPath:String, file:File): Unit = {
+    if(!file.exists()) return
+    else if(file.isDirectory)
+      file.listFiles.iterator.foreach{ f=>
+        save(entryPath+"/"+f.getName, f)
+      }
+    else {
+      val crc = Using.resource(new FileInputStream(file)) { is =>
+        val crc32 = new CRC32()
+        val buffer = new Array[Byte](32*1024)
+        def update(): Long = is.read(buffer) match {
+          case -1 => crc32.getValue
+          case n =>
+            crc32.update(buffer,0,n)
+            update()
+        }
+        update()
+      }
+      Using.resource(new FileInputStream(file)) { is=>
+        val e = new ZipEntry(entryPath)
+        e.setMethod(ZipEntry.STORED)
+        e.setSize(file.length)
+        e.setTime(file.lastModified)
+        e.setCrc(crc)
+        save(e, is)
+      }
+    }
+  }
+  def save(entryPath:String, data:String): Unit = {
+    val is = new ByteArrayInputStream(data.getBytes("utf-8"))
+    save(new ZipEntry(entryPath), is)
+  }
+
+  override def close() = zip.close()
 }

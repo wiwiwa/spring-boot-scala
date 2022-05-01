@@ -40,8 +40,7 @@ trait JavaAppModule extends JavaModule {
           println(s"Adding new git tag: $version")
           os.proc("git","tag", version)
         }
-        val snapshot = if(isClean) "" else "-SNAPSHOT"
-        s"$version$snapshot"
+        if(isClean) version else "SNAPSHOT"
       case _ => throw new IllegalStateException("A git tag not found in format for xxx.yyy")
     }
   }

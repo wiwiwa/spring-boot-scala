@@ -8,17 +8,14 @@ import org.springframework.web.bind.annotation.{RequestMapping, RestController}
 @SpringBootApplication
 @RestController
 @RequestMapping(path = Array("/"))
-class DemoSpringBootApplication {
+class DemoSpringBootApplication:
   @Autowired var repo: DemoBeanRepository = null
 
   @RequestMapping(path = Array("/"))
-  def home = {
+  def home =
     if(repo.count()==0)
       repo.save(new DemoBean())
     repo.getById(1)
-  }
-}
 
-@main
-def main(): Unit =
+@main def main(): Unit =
   new SpringApplication(classOf[DemoSpringBootApplication]).run()
