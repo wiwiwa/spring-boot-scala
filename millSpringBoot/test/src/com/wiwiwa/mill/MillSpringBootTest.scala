@@ -6,7 +6,7 @@ import com.wiwiwa.springboot.SpringBootScalaModule
 import mill.api.Result.{Exception, Failure, Success}
 import mill.Agg
 import mill.define.{BasePath, Caller, Ctx, ExternalModule, Segments, Task}
-import mill.eval.Evaluator
+import mill.eval.{Evaluator, EvaluatorPaths}
 import mill.moduledefs.Cacher
 import mill.util.PrintLogger
 import sourcecode.Name
@@ -17,7 +17,7 @@ object MillSpringBootTest extends TestSuite with Cacher {
   val testApp = createModule()
 
   override def tests = Tests{
-    val ret = testApp.applicationVersion.value
+    val ret = testApp.manifest.value
     assert( ret != null )
   }
 
@@ -52,6 +52,7 @@ object MillSpringBootTest extends TestSuite with Cacher {
 
   implicit class MillTask(task:Task[_]) {
     def value = {
+      clearCache()
       evaluator.evaluate(Agg(task))
         .results
         .collect {
@@ -59,6 +60,12 @@ object MillSpringBootTest extends TestSuite with Cacher {
           case (t, Exception(e, _)) => throw new RuntimeException(s"$t failed", e)
           case (t, Failure(msg, _)) => throw new RuntimeException(s"$t failed: $msg")
         }.last
+    }
+    def clearCache() = {
+      val (map, _) = Evaluator.plan(Agg(task))
+      val Right(label) = map.keys().toSeq.last
+      val meta = EvaluatorPaths.resolveDestPaths(evaluator.outPath, evaluator.destSegments(label)).meta
+      os.remove(meta)
     }
   }
 }
