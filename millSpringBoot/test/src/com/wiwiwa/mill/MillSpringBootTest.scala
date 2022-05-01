@@ -17,18 +17,8 @@ object MillSpringBootTest extends TestSuite with Cacher {
   val testApp = createModule()
 
   override def tests = Tests{
-    val ret = evaluate( testApp.manifest )
+    val ret = testApp.applicationVersion.value
     assert( ret != null )
-  }
-
-  def evaluate(task: Task[_]) = {
-    evaluator.evaluate(Agg(task))
-      .results
-      .collect{
-        case (_,Success(v)) => v
-        case (t,Exception(e,_)) => throw new RuntimeException(s"$t failed",e)
-        case (t,Failure(msg,_)) => throw new RuntimeException(s"$t failed: $msg")
-      }.last
   }
 
   def createModule() = {
@@ -58,6 +48,18 @@ object MillSpringBootTest extends TestSuite with Cacher {
       Defaults.ammoniteHome, wd / "out", wd / "out",
       rootModule, logger
     )
+  }
+
+  implicit class MillTask(task:Task[_]) {
+    def value = {
+      evaluator.evaluate(Agg(task))
+        .results
+        .collect {
+          case (_, Success(v)) => v
+          case (t, Exception(e, _)) => throw new RuntimeException(s"$t failed", e)
+          case (t, Failure(msg, _)) => throw new RuntimeException(s"$t failed: $msg")
+        }.last
+    }
   }
 }
 
