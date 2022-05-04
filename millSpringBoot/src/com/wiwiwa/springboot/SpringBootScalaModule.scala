@@ -35,7 +35,7 @@ trait SpringBootScalaModule extends ScalaAppModule {
                        |Implementation-Version: ${publishVersion()}
                        |Main-Class: org.springframework.boot.loader.JarLauncher
                        |Start-Class: ${finalMainClass()}
-                       |Spring-Boot-Version: $compileSpringBootVersion
+                       |Spring-Boot-Version: ${compileSpringBootVersion()}
                        |Spring-Boot-Classes: BOOT-INF/classes/
                        |Spring-Boot-Lib: BOOT-INF/lib/
                        |Spring-Boot-Classpath-Index: BOOT-INF/classpath.idx
