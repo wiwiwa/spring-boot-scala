@@ -19,8 +19,10 @@ import scala.util.Using
  */
 trait SpringBootScalaModule extends ScalaAppModule {
   override def mandatoryIvyDeps = T{
-    var springBootScalaVersion = classOf[SpringBootScalaModule].getPackage.getImplementationVersion
-    if(springBootScalaVersion==null) springBootScalaVersion = "0.11"
+    val springBootScalaVersion = classOf[SpringBootScalaModule].getPackage.getImplementationVersion match {
+      case null => "SNAPSHOT"
+      case v => v
+    }
     super.mandatoryIvyDeps() ++ Agg(
       ivy"com.wiwiwa::spring-boot-scala:$springBootScalaVersion",
     )
@@ -93,6 +95,16 @@ trait SpringBootScalaModule extends ScalaAppModule {
     resolution.dependencies
       .find{d=> d.module.organization.value=="org.springframework.boot" && d.module.name.value=="spring-boot"}
       .map(_.version).get
+  }
+
+  trait Tests extends ScalaModuleTests {
+    override def ivyDeps = {
+      val springBootScalaVersion = classOf[SpringBootScalaModule].getPackage.getImplementationVersion match {
+        case null => "SNAPSHOT"
+        case v => v
+      }
+      Agg( ivy"com.wiwiwa::spring-boot-test:$springBootScalaVersion" )
+    }
   }
 }
 

@@ -50,6 +50,8 @@ object springBootScala extends ScalaAppModule with PublishModule {
 
 object springBootTest extends ScalaAppModule with PublishModule {
   override def scalaVersion = scala3
+  override def organization = millSpringBoot.organization
+
   override def ivyDeps = Agg(
     ivy"org.springframework.boot:spring-boot-starter-web:$springBootVersion",
     ivy"org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion",
