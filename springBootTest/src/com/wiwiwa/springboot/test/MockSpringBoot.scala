@@ -1,5 +1,6 @@
 package com.wiwiwa.springboot.test
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.jayway.jsonpath.{JsonPath, PathNotFoundException}
 import com.wiwiwa.scala.spring.JsonConfiguration
 import net.minidev.json.JSONArray
@@ -26,6 +27,7 @@ import scala.reflect.{ClassTag, classTag}
 trait MockSpringBoot:
   private var mockSpringMvc: MockMvc = null
   private var mockSpringSession: HttpSession = null
+  private var objectMapper: ObjectMapper = null
   private var beanFactory: DefaultListableBeanFactory = createBeanFactory()
 
   def bean[T:ClassTag]: T = beanFactory.getBean(classTag[T].runtimeClass.asInstanceOf[Class[T]], null.asInstanceOf[Array[AnyRef]]:_*)
@@ -58,6 +60,7 @@ trait MockSpringBoot:
       }.loadContext(configuration)
       .getAutowireCapableBeanFactory.asInstanceOf[DefaultListableBeanFactory]
     mockSpringMvc = beanFactory.getBean(classOf[MockMvc])
+    objectMapper = beanFactory.getBean(classOf[ObjectMapper])
     mockSpringSession = null
     beanFactory
 
@@ -71,21 +74,15 @@ trait MockSpringBoot:
   def post(uri:String, data:Map[String,Any]=Map.empty): JsonResponse =
     val req = MockMvcRequestBuilders.post(uri)
     sendRequest(uri,req,data)
-  private def sendRequest(uri:String, req:MockHttpServletRequestBuilder, data:Map[String,Any]=Map.empty): JsonResponse =
-    def addParam(key:String,value:Any): Unit = value match
-      case null => ()
-      case m:Map[_,_] =>
-        val sep = if key.isEmpty then "" else "."
-        m.foreach{(k,v)=>addParam(key+sep+k, v)}
-      case m:util.LinkedHashMap[_,_] => addParam(key,m.asScala.toMap)
-      case l:util.List[_] => l.asScala.foreach{v=> addParam(key,v)}
-      case l:Array[_] => l.foreach{v=> addParam(key,v)}
-      case _ => req.param(key,value.toString)
-    addParam("", data)
-    sendRequest(uri, req)
-  private def sendRequest(url:String, reqBuider:MockHttpServletRequestBuilder): JsonResponse =
-    if mockSpringSession!=null then reqBuider.session(mockSpringSession.asInstanceOf)
-    val result = mockSpringMvc.perform(reqBuider).andReturn()
+  private def sendRequest(uri:String, reqBuilder:MockHttpServletRequestBuilder, data:Map[String,Any]=Map.empty): JsonResponse =
+    reqBuilder.content{
+      objectMapper.writeValueAsString(data)
+    }
+    if mockSpringSession!=null then
+      reqBuilder.session(mockSpringSession.asInstanceOf)
+    reqBuilder.header("CONTENT-TYPE","application/json")
+    //send
+    val result = mockSpringMvc.perform(reqBuilder).andReturn()
     if mockSpringSession==null then
       mockSpringSession = result.getRequest.getSession(false)
     val response = result.getResponse
@@ -93,8 +90,8 @@ trait MockSpringBoot:
       val msg = result.getRequest.getAttribute(classOf[DefaultErrorAttributes].getName+".ERROR") match
         case ex:Exception=> ex.getMessage
         case _ => response.getContentAsString
-      throw HttpStatusException(response.getStatus, url, msg)
-    new JsonResponse(url, response)
+      throw HttpStatusException(response.getStatus, uri, msg)
+    new JsonResponse(uri, response)
 
 class JsonResponse(url:String, response: MockHttpServletResponse):
   lazy val inputStream = new ByteArrayInputStream( response.getContentAsByteArray )
@@ -120,8 +117,9 @@ class JsonResponse(url:String, response: MockHttpServletResponse):
     if !passed then
       throw new JsonAssertException(url, path, text, jsonObj, expected)
     this
-  def json[T>:Null](implicit ct:ClassTag[T]): T = json("$")
-  def json[T>:Null](path:String)(implicit ct:ClassTag[T]): T =
+  def json[T:ClassTag]: T = json("$")
+  def json[T:ClassTag](path:String): T =
+    val ct = classTag[T]
     if classOf[Map[_,_]].isAssignableFrom(ct.runtimeClass) then
       val value:util.Map[Any,Any] = json(path)
       value.asScala.toMap.asInstanceOf[T]
@@ -129,10 +127,10 @@ class JsonResponse(url:String, response: MockHttpServletResponse):
       val value: JSONArray = json(path)
       value.asScala.toList.asInstanceOf[T]
     else jsonDocument match
-      case null => null
+      case null => null.asInstanceOf[T]
       case _ =>
         try jsonDocument.read(path, ct.runtimeClass.asInstanceOf[Class[T]])
-        catch case _:PathNotFoundException => null
+        catch case _:PathNotFoundException => null.asInstanceOf[T]
   def assertStatus(expected:Int) = if status!=expected then
     throw AssertionError(s"Expected status: $expected; actual value: $status")
   def assertHeader(header:String, expected:String) = response.getHeader(header) match

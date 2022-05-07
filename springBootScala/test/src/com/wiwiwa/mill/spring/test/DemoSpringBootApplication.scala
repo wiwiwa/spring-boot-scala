@@ -1,21 +1,10 @@
 package com.wiwiwa.mill.spring.test
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.web.bind.annotation.{RequestMapping, RestController}
 
 @SpringBootApplication
-@RestController
-@RequestMapping(path = Array("/"))
-class DemoSpringBootApplication:
-  @Autowired var repo: DemoBeanRepository = null
-
-  @RequestMapping(path = Array("/"))
-  def home =
-    if(repo.count()==0)
-      repo.save(new DemoBean())
-    repo.getById(1)
+class DemoSpringBootApplication
 
 @main def main(): Unit =
   new SpringApplication(classOf[DemoSpringBootApplication]).run()
