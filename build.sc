@@ -55,4 +55,5 @@ object springBootTest extends ScalaAppModule with PublishModule {
     ivy"org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion",
     ivy"org.springframework.boot:spring-boot-starter-test:$springBootVersion",
   )
+  override def moduleDeps = Seq(springBootScala)
 }

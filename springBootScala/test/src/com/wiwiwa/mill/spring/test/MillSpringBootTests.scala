@@ -1,6 +1,6 @@
 package com.wiwiwa.mill.spring.test
 
-import com.wiwiwa.spring.test.MockSpringBoot
+import com.wiwiwa.springboot.test.MockSpringBoot
 import utest.*
 
 object MillSpringBootTests extends TestSuite with MockSpringBoot:

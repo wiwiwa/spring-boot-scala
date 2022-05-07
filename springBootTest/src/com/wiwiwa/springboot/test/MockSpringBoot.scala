@@ -1,9 +1,10 @@
-package com.wiwiwa.spring.test
+package com.wiwiwa.springboot.test
 
 import com.jayway.jsonpath.{JsonPath, PathNotFoundException}
+import com.wiwiwa.scala.spring.JsonConfiguration
 import net.minidev.json.JSONArray
 import org.springframework.beans.factory.support.{DefaultListableBeanFactory, RootBeanDefinition}
-import org.springframework.boot.SpringBootConfiguration
+import org.springframework.boot.{SpringApplication, SpringBootConfiguration}
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.{AnnotatedClassFinder, SpringBootContextLoader, SpringBootTest, SpringBootTestContextBootstrapper}
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes
@@ -50,6 +51,10 @@ trait MockSpringBoot:
           val app = super.getSpringApplication
           app.setLazyInitialization(true)
           app
+        override def getInitializers(config:MergedContextConfiguration, application:SpringApplication) = //add ObjectMapper bean
+          val list = super.getInitializers(config, application)
+          list.add(new JsonConfiguration)
+          list
       }.loadContext(configuration)
       .getAutowireCapableBeanFactory.asInstanceOf[DefaultListableBeanFactory]
     mockSpringMvc = beanFactory.getBean(classOf[MockMvc])
