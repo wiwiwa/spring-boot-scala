@@ -38,7 +38,7 @@ trait JavaAppModule extends JavaModule {
         }
         if(isClean && !isHead) {
           println(s"Adding new git tag: $version")
-          os.proc("git","tag", version)
+          os.proc("git","tag", version).call()
         }
         if(isClean) version else "SNAPSHOT"
       case _ => throw new IllegalStateException("A git tag not found in format for xxx.yyy")

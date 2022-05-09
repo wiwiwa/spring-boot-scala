@@ -30,8 +30,8 @@ trait SpringBootScalaModule extends ScalaAppModule {
   override def javacOptions = Seq("-parameters")
 
   override def assembly = T {
-    val jar = T.dest / "out.jar"
-    Using.resource(new BootJar(jar.toIO)){ jar=>
+    val jarPath = T.workspace / "out" / s"${artifactId()}-${publishVersion()}.jar"
+    Using.resource(new BootJar(jarPath.toIO)){ jar=>
       //write MANIFEST
       val manifest = s"""Manifest-Version: 1.0,
                        |Implementation-Version: ${publishVersion()}
@@ -80,7 +80,8 @@ trait SpringBootScalaModule extends ScalaAppModule {
                        |""".stripMargin
       jar.save("BOOT-INF/layers.idx", layerIdx)
     }
-    PathRef(jar)
+    println(s"Built Spring Boot jar file $jarPath")
+    PathRef(jarPath)
   }
   def ivySpringBootLoader = T{ Agg(ivy"org.springframework.boot:spring-boot-loader:${compileSpringBootVersion()}") }
   def ivySpringBootJarmodeLayerTools = T{ Agg(ivy"org.springframework.boot:spring-boot-jarmode-layertools:${compileSpringBootVersion()}") }
@@ -96,6 +97,7 @@ trait SpringBootScalaModule extends ScalaAppModule {
       .find{d=> d.module.organization.value=="org.springframework.boot" && d.module.name.value=="spring-boot"}
       .map(_.version).get
   }
+  override def artifactSuffix = ""
 
   trait Tests extends ScalaModuleTests {
     override def ivyDeps = {
