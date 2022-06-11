@@ -99,7 +99,8 @@ trait SpringBootScalaModule extends ScalaAppModule {
   }
   override def artifactSuffix = ""
 
-  trait Tests extends ScalaModuleTests {
+  trait Tests extends SpringBootTests
+  trait SpringBootTests extends ScalaModuleTests {
     override def ivyDeps = {
       val springBootScalaVersion = classOf[SpringBootScalaModule].getPackage.getImplementationVersion match {
         case null => "SNAPSHOT"

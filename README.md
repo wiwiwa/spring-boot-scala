@@ -7,15 +7,22 @@
   * Publish project `AbcDef` as artifact `abc-def`
 * Add the `spring-boot-scala-lib` artifact to `ivyDeps`, which
   * Enable Scala class properties and class getter/setter as Spring bean properties
+* Provides trait `Tests` and `SpringBootTests`. Both of them can be used as base class of test module, which:
+  * Add artifact `spring-boot-test` to `ivyDeps`, which
+    * provide class `MockSpringBoot`, which
+      * `get()`, `post()`: mocked http methods, which return mocked response
+      * Mocked response has method:
+        * `json<T>`: parse response as String, Integer, Array, and Map
+        * `assertJson(path)`: assert value at json path `path` to be truthy
+        * `assertJson(path, value)`: assert value at json path `path` equals `value`
 
 # Usage
 
 In your `build.sc`:
 ```scala
-import $ivy.`com.wiwiwa::millSpringBoot:0.11`, com.wiwiwa.springboot.SpringBootScalaModule
-object springTest extends SpringBootScalaModule {
-  override def scalaVersion = "3.1.0"
-  ...
+import $ivy.`com.wiwiwa::millSpringBoot:x.xx`, com.wiwiwa.springboot.SpringBootScalaModule
+object mySpringApp extends SpringBootScalaModule {
+  object test extends Tests with TestModule.Utest
 }
 ```
 

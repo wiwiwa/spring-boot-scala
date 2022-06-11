@@ -30,7 +30,6 @@ object MillSpringBootTest extends TestSuite with Cacher {
       Ctx.External(false), Ctx.Foreign(None), sourcecode.File(""), Caller("")
     )
     new SpringBootScalaModule {
-      override def scalaVersion = "3.1.0"
       override def organization = this.getClass.getPackageName
       override def mainClass = Some("DummyMain")
       override def ivyDeps = T{

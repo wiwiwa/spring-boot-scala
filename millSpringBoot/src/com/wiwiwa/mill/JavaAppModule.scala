@@ -27,7 +27,7 @@ trait JavaAppModule extends JavaModule {
 
   def applicationVersion = T.input {
     implicit val pwd: os.Path = millSourcePath / os.up
-    val GitLog = """(?s)(.*?)\btag:\s+([^.]+)\.(\d*)([^)]*).*""".r
+    val GitLog = """(?s)(.*?)\btag:\s+([^.]+)\.(\d*)([^,)]*).*""".r
     os.proc("git","log","--decorate").call().out.text match {
       case GitLog(prefix, vLeft, vMinor, vRight) =>
         val isClean = os.proc("git","status").call().out.lines.last.endsWith(" clean")
