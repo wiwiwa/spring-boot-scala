@@ -1,10 +1,18 @@
-# SpringBootScalaModule
+# mill-spring-boot
+A Mill plugin that project the following modules:
 
-`SpringBootScalaModule` is a mill plugin which:
-* Build Spring Boot application as a fat Jar using `mill`
-* Auto naming artifact to be publshed
+## ScalaAppModule
+`ScalaAppModule` is a mill plugin which:
+* set default scala version to `3.x.x`
+* Auto naming artifact to be published
   * Auto increase version number when building jar or publishing artifacts
   * Publish project `AbcDef` as artifact `abc-def`
+* Add mill command `showUpdates` to list upgradable dependencies
+
+## SpringBootScalaModule
+`SpringBootScalaModule` is a mill plugin which:
+* has already features provided by `ScalaAppModule`
+* Build Spring Boot application as a fat Jar using `mill`
 * Add the `spring-boot-scala-lib` artifact to `ivyDeps`, which
   * Enable Scala class properties and class getter/setter as Spring bean properties
 * Provides trait `Tests` and `SpringBootTests`. Both of them can be used as base class of test module, which:
