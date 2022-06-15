@@ -2,18 +2,14 @@ package com.wiwiwa.springboot.test
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.jayway.jsonpath.{JsonPath, PathNotFoundException}
-import com.wiwiwa.scala.spring.JsonConfiguration
 import net.minidev.json.JSONArray
 import org.springframework.beans.factory.support.{DefaultListableBeanFactory, RootBeanDefinition}
-import org.springframework.boot.{SpringApplication, SpringBootConfiguration}
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.{AnnotatedClassFinder, SpringBootContextLoader, SpringBootTest, SpringBootTestContextBootstrapper}
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.{SpringApplication, SpringBootConfiguration}
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes
 import org.springframework.mock.web.MockHttpServletResponse
-import org.springframework.scheduling.annotation.EnableScheduling
-import org.springframework.test.context.MergedContextConfiguration
-import org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate
-import org.springframework.test.context.support.DefaultBootstrapContext
+import org.springframework.test.context.TestContextManager
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.{MockHttpServletRequestBuilder, MockMvcRequestBuilders}
 
@@ -39,26 +35,13 @@ trait MockSpringBoot:
     beanObj
   def createBeanFactory() =
     System.setProperty("spring.profiles.active", "test")
-    val mainClass = new AnnotatedClassFinder(classOf[SpringBootConfiguration])
-      .findFromClass(this.getClass)
-    val configuration =
-      val contextLoader = new DefaultCacheAwareContextLoaderDelegate()
-      val bootstrapper = new SpringBootTestContextBootstrapper :
-        /** return mainClass to Spring */
-        override def getOrFindConfigurationClasses(config: MergedContextConfiguration) = Array(mainClass)
-      bootstrapper.setBootstrapContext(new DefaultBootstrapContext(classOf[MockAllBeans], contextLoader))
-      bootstrapper.buildMergedContextConfiguration()
-    beanFactory = new SpringBootContextLoader{
-        override def getSpringApplication = //override to lazy init beans
-          val app = super.getSpringApplication
-          app.setLazyInitialization(true)
-          app
-        override def getInitializers(config:MergedContextConfiguration, application:SpringApplication) = //add ObjectMapper bean
-          val list = super.getInitializers(config, application)
-          list.add(new JsonConfiguration)
-          list
-      }.loadContext(configuration)
-      .getAutowireCapableBeanFactory.asInstanceOf[DefaultListableBeanFactory]
+    if !this.getClass.isAnnotationPresent(classOf[SpringBootTest]) || !this.getClass.isAnnotationPresent(classOf[AutoConfigureMockMvc]) then
+      throw new RuntimeException("Test class should be marked with @SpringBootTest and @AutoConfigureMockMvc")
+    beanFactory =
+      val testContextManager = new TestContextManager(this.getClass)
+      testContextManager.prepareTestInstance(this)
+      testContextManager.getTestContext.getApplicationContext
+        .getAutowireCapableBeanFactory.asInstanceOf[DefaultListableBeanFactory]
     mockSpringMvc = beanFactory.getBean(classOf[MockMvc])
     objectMapper = beanFactory.getBean(classOf[ObjectMapper])
     mockSpringSession = null
@@ -154,8 +137,3 @@ class JsonAssertException(url:String, jsonPath:String, json:String, valueAtPath:
 case class HttpStatusException(status:Int, url:String, text:String)
   extends Exception:
   override def getMessage = s"Http status $status at $url: $text"
-
-@SpringBootTest
-@AutoConfigureMockMvc
-@EnableScheduling
-class MockAllBeans
