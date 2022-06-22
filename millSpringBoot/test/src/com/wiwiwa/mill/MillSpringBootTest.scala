@@ -19,7 +19,7 @@ object MillSpringBootTest extends TestSuite with Cacher {
   val evaluator = createEvaluator()
 
   override def tests = Tests{
-    val ret = testApp.showUpdates(evaluator).value
+    val ret = testApp.assembly.value
     assert( ret != null )
   }
 

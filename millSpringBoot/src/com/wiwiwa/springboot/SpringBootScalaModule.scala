@@ -56,14 +56,15 @@ trait SpringBootScalaModule extends ScalaAppModule {
       }
       //write ivy libs
       val layerTools = resolveDeps(ivySpringBootJarmodeLayerTools)()
-      (resolvedIvyDeps() ++ layerTools).iterator
+      val libs = resolvedIvyDeps() ++ unmanagedClasspath()
+      (libs ++ layerTools).iterator
         .map(_.path.toIO)
         .foreach{ f=> jar.save(s"BOOT-INF/lib/${f.getName}", f) }
       //write class files
       localClasspath().map(_.path.toIO)
-        .foreach{ f=> jar.save(s"BOOT-INF/${f.getName}", f) }
+        .foreach{f=> jar.save(s"BOOT-INF/classes", f) }
       //write idx files
-      val classpath = resolvedIvyDeps().iterator
+      val classpath = libs.iterator
         .map(_.path.toIO.getName).map{s=>s"- \"BOOT-INF/lib/$s\""}
         .mkString("\n") + "\n"
       jar.save("BOOT-INF/classpath.idx", classpath)

@@ -1,8 +1,8 @@
-import $ivy.`com.wiwiwa::mill-spring-boot:1.3`, com.wiwiwa.mill.ScalaAppModule
+import $ivy.`com.wiwiwa::mill-spring-boot:1.5`, com.wiwiwa.mill.ScalaAppModule
 import mill._
 import mill.scalalib._
 
-val springBootVersion = "2.6.7"
+val springBootVersion = "2.7.0"
 val uTestVersion = "0.7.10"
 
 trait LibModule extends ScalaAppModule with PublishModule {
