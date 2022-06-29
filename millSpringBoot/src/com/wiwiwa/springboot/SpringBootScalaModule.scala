@@ -102,12 +102,15 @@ trait SpringBootScalaModule extends ScalaAppModule {
 
   trait Tests extends SpringBootTests
   trait SpringBootTests extends ScalaModuleTests {
-    override def ivyDeps = {
+    override def ivyDeps = T{
       val springBootScalaVersion = classOf[SpringBootScalaModule].getPackage.getImplementationVersion match {
         case null => "SNAPSHOT"
         case v => v
       }
-      Agg( ivy"com.wiwiwa::spring-boot-test:$springBootScalaVersion" )
+      Agg(
+        ivy"com.wiwiwa::spring-boot-test:$springBootScalaVersion",
+        ivy"org.springframework.boot:spring-boot-test-autoconfigure:${compileSpringBootVersion()}",
+      )
     }
   }
 }

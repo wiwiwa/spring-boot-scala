@@ -1,5 +1,4 @@
-import $ivy.`com.wiwiwa::mill-spring-boot:SNAPSHOT`
-import com.wiwiwa.springboot.SpringBootScalaModule
+import $ivy.`com.wiwiwa::mill-spring-boot:SNAPSHOT`, com.wiwiwa.springboot.SpringBootScalaModule
 import mill._
 import mill.scalalib._
 import os.Path
