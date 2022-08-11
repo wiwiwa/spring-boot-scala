@@ -11,7 +11,7 @@ A Mill plugin that project the following modules:
 
 ## SpringBootScalaModule
 `SpringBootScalaModule` is a mill plugin which:
-* has already features provided by `ScalaAppModule`
+* has all features provided by `ScalaAppModule`
 * Build Spring Boot application as a fat Jar using `mill`
 * Add the `spring-boot-scala-lib` artifact to `ivyDeps`, which
   * Enable Scala class properties and class getter/setter as Spring bean properties

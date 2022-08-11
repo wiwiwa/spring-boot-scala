@@ -3,14 +3,15 @@ package com.wiwiwa.mill
 import ammonite.main.Defaults
 import ammonite.util.Colors
 import com.wiwiwa.springboot.SpringBootScalaModule
-import mill.{Agg, T}
 import mill.api.Result.{Exception, Failure, Success}
-import mill.define.{BasePath, Caller, Ctx, Discover, ExternalModule, Segments, Task}
+import mill.define.Segment.Label
+import mill.define._
 import mill.eval.{Evaluator, EvaluatorPaths}
 import mill.moduledefs.Cacher
 import mill.scalalib.DepSyntax
 import mill.util.PrintLogger
-import org.springframework.boot.SpringApplication
+import mill.{Agg, T}
+import org.springframework.boot.loader.tools.Repackager
 import sourcecode.Name
 import utest._
 
@@ -24,18 +25,27 @@ object MillSpringBootTest extends TestSuite with Cacher {
   }
 
   def createModule() = {
-    val name = getClass.getSimpleName.replace("$","")
+    val name = "springBootScalaTest"
+    val projectPath = os.pwd/"springBootScala"/"test"
     implicit val ctx = Ctx.make(
-      implicitly, implicitly, Name(name), BasePath(os.pwd), Segments(),
+      implicitly, implicitly, Name(name), BasePath(projectPath), Segments(),
       Ctx.External(false), Ctx.Foreign(None), sourcecode.File(""), Caller("")
     )
-    new RootModule with SpringBootScalaModule {
+    new TestSpringBootModule with SpringBootScalaModule {
       override def organization = this.getClass.getPackageName
-      override def mainClass = Some("DummyMain")
-      override def ivyDeps = T{
-        val springBootVersion = classOf[SpringApplication].getPackage.getImplementationVersion
-        Agg(ivy"org.springframework.boot:spring-boot-starter-web:$springBootVersion")
+      override def ivyDeps = T {
+        val springBootVersion = classOf[Repackager].getPackage.getImplementationVersion
+        super.ivyDeps() ++ Seq(
+          ivy"com.wiwiwa::spring-boot-test:1.6",
+          ivy"com.lihaoyi::utest:0.7.10",
+          ivy"org.springframework.boot:spring-boot-starter-web:$springBootVersion",
+          ivy"org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion",
+          ivy"com.h2database:h2:1.4.200",
+          ivy"javax.xml.bind:jaxb-api:2.3.1",
+        )
       }
+      override def millSourcePath = projectPath
+      implicit override def millModuleSegments = Segments(Label(name))
     }
   }
 
@@ -48,11 +58,8 @@ object MillSpringBootTest extends TestSuite with Cacher {
       false,
       context = ""
     )
-    val wd = os.pwd
-    Evaluator(
-      Defaults.ammoniteHome, wd / "out", wd / "out",
-      testApp, logger
-    )
+    val outDir = testApp.millSourcePath/"out"
+    Evaluator( Defaults.ammoniteHome, outDir, outDir, testApp, logger )
   }
 
   implicit class MillTask(task:Task[_]) {
@@ -77,4 +84,7 @@ object MillSpringBootTest extends TestSuite with Cacher {
 
 class RootModule extends ExternalModule {
   override def millDiscover = Discover[this.type]
+}
+class TestSpringBootModule extends RootModule with SpringBootScalaModule{
+  object test extends Tests
 }

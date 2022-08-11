@@ -1,4 +1,4 @@
-import $ivy.`com.wiwiwa::mill-spring-boot:1.5`, com.wiwiwa.mill.ScalaAppModule
+import $ivy.`com.wiwiwa::mill-spring-boot:1.7`, com.wiwiwa.mill.ScalaAppModule
 import mill._
 import mill.scalalib._
 
@@ -14,6 +14,11 @@ object millSpringBoot extends LibModule {
   val millVersion = classOf[JavaModule].getResource(classOf[JavaModule].getSimpleName+".class")
     .getPath.replaceFirst(raw"^.*[/\-]([\d.]+)(\.jar)?!.*","$1")
 
+  override def ivyDeps = Agg(
+    ivy"org.springframework.boot:spring-boot-maven-plugin:$springBootVersion",
+    ivy"org.apache.maven.shared:maven-common-artifact-filters:3.3.1",
+    ivy"org.apache.maven:maven-core:3.8.6",
+  )
   override def compileIvyDeps = Agg(
     ivy"com.lihaoyi::mill-scalalib:$millVersion",
   )
