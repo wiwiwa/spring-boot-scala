@@ -1,4 +1,4 @@
-package com.wiwiwa.scala.spring
+package com.wiwiwa.scaler.spring
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature

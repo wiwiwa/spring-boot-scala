@@ -1,4 +1,4 @@
-package com.wiwiwa.scala.spring
+package com.wiwiwa.scaler.spring
 
 import org.springframework.beans.BeanInfoFactory
 import org.springframework.core.Ordered

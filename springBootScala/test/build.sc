@@ -3,11 +3,11 @@ import mill._
 import mill.scalalib._
 import os.Path
 
-object demo extends SpringBootScalaModule {
-  def scalaVersion = "3.1.0"
-  val springBootVersion = "2.6.7"
+val springBootVersion = "2.7.0"
 
+object demo extends SpringBootScalaModule {
   override def ivyDeps = T{ super.ivyDeps() ++ Seq(
+    ivy"com.wiwiwa::spring-boot-test:SNAPSHOT",
     ivy"com.lihaoyi::utest:0.7.10",
     ivy"org.springframework.boot:spring-boot-starter-web:$springBootVersion",
     ivy"org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion",

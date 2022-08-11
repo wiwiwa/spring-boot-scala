@@ -1,2 +1,2 @@
-org.springframework.beans.BeanInfoFactory=com.wiwiwa.scala.spring.ScalaBeanInfoFactory
-org.springframework.context.ApplicationContextInitializer=com.wiwiwa.scala.spring.JsonConfiguration
+org.springframework.beans.BeanInfoFactory=com.wiwiwa.scaler.spring.ScalaBeanInfoFactory
+org.springframework.context.ApplicationContextInitializer=com.wiwiwa.scaler.spring.JsonConfiguration
