@@ -32,7 +32,7 @@ object MillSpringBootTest extends TestSuite with Cacher {
       Ctx.External(false), Ctx.Foreign(None), sourcecode.File(""), Caller("")
     )
     new TestSpringBootModule with SpringBootScalaModule {
-      override def organization = this.getClass.getPackageName
+      override def scalaVersion = "3.1.0"
       override def ivyDeps = T {
         val springBootVersion = classOf[Repackager].getPackage.getImplementationVersion
         super.ivyDeps() ++ Seq(
@@ -85,6 +85,7 @@ object MillSpringBootTest extends TestSuite with Cacher {
 class RootModule extends ExternalModule {
   override def millDiscover = Discover[this.type]
 }
-class TestSpringBootModule extends RootModule with SpringBootScalaModule{
+abstract class TestSpringBootModule extends RootModule with ScalaLibraryModule {
   object test extends Tests
+  override def organization = "org"
 }

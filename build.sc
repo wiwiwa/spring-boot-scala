@@ -1,15 +1,13 @@
-import $ivy.`com.wiwiwa::mill-spring-boot:1.7`, com.wiwiwa.mill.ScalaAppModule
+import $ivy.`com.wiwiwa::mill-spring-boot:1.8`, com.wiwiwa.mill.ScalaLibraryModule
 import mill._
 import mill.scalalib._
 
 val springBootVersion = "2.7.0"
 val uTestVersion = "0.7.10"
 
-trait LibModule extends ScalaAppModule with PublishModule {
-  override def organization = "com.wiwiwa"
-}
 
-object millSpringBoot extends LibModule {
+object millSpringBoot extends ScalaLibraryModule {
+  def organization = "com.wiwiwa"
   override def scalaVersion = "2.13.7"
   val millVersion = classOf[JavaModule].getResource(classOf[JavaModule].getSimpleName+".class")
     .getPath.replaceFirst(raw"^.*[/\-]([\d.]+)(\.jar)?!.*","$1")
@@ -33,7 +31,9 @@ object millSpringBoot extends LibModule {
   }
 }
 
-object springBootScala extends LibModule {
+object springBootScala extends ScalaLibraryModule {
+  def organization = millSpringBoot.organization
+  override def scalaVersion = "3.1.0"
   override def ivyDeps = Agg(
     ivy"com.fasterxml.jackson.module::jackson-module-scala:2.13.1",
   )
@@ -51,7 +51,9 @@ object springBootScala extends LibModule {
   }
 }
 
-object springBootTest extends LibModule {
+object springBootTest extends ScalaLibraryModule {
+  def organization = millSpringBoot.organization
+  override def scalaVersion = springBootScala.scalaVersion
   override def ivyDeps = Agg(
     ivy"org.springframework.boot:spring-boot-starter-web:$springBootVersion",
     ivy"org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion",
