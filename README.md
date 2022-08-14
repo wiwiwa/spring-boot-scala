@@ -48,6 +48,12 @@ $ java -jar out/millSpringBoot/testJar/assembly/overriden/mill/scalalib/JavaModu
 # To run demo
 $ cd springBootScala/test
 $ ../../mill demo
-# to release
+# to publish locally for testing
 $ ./mill _.publishLocal
+# to release to official maven repository
+$ SONATYPE_USER='<sontype-user>'
+$ read -s SONATYPE_PASSWORD # input password without echo
+$ for PROJECT in millSpringBoot springBootScala springBootTest; do
+  ./mill -i millSpringBoot.publish --sonatypeCreds "$SONATYPE_USER:$SONATYPE_PASSWORD" --release true
+done
 ```

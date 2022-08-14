@@ -34,7 +34,7 @@ trait SpringBootScalaModule extends ScalaAppModule {
   override def assembly = T {
     val jarPath = T.workspace / "out" / s"${artifactId()}-${publishVersion()}.jar"
     val mavenProject = new MavenProject {
-      override def getArtifact = new DefaultArtifact(organization, artifactId(), publishVersion(), "compile", "", null, new DefaultArtifactHandler("jar"))
+      override def getArtifact = new DefaultArtifact("my.organization", artifactId(), publishVersion(), "compile", "", null, new DefaultArtifactHandler("jar"))
       override def getArtifacts = resolvedRunIvyDeps().map(_.path)
         .map { p =>
           val List(version, name, group) = p.segments.toList.reverse match {
