@@ -45,6 +45,6 @@ $ ./mill _.publishLocal
 $ SONATYPE_USER='<sontype-user>'
 $ read -s SONATYPE_PASSWORD # input password without echo
 $ for PROJECT in millSpringBoot springBootScala springBootTest; do
-  ./mill -i millSpringBoot.publish --sonatypeCreds "$SONATYPE_USER:$SONATYPE_PASSWORD" --release true
+  ./mill -i $PROJECT.publish --sonatypeCreds "$SONATYPE_USER:$SONATYPE_PASSWORD" --release true
 done
 ```
