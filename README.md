@@ -37,17 +37,8 @@ object mySpringApp extends SpringBootScalaModule {
 # Development
 
 ```bash
-# To generate Idea project files
-./mill mill.scalalib.GenIdea/idea
-
 # To test
 $ ./mill millSpringBoot.test
-# To test building and running a Spring Boot fat jar
-$ ./mill show millSpringBoot.testJar.assembly
-$ java -jar out/millSpringBoot/testJar/assembly/overriden/mill/scalalib/JavaModule/assembly/dest/out.jar
-# To run demo
-$ cd springBootScala/test
-$ ../../mill demo
 # to publish locally for testing
 $ ./mill _.publishLocal
 # to release to official maven repository
