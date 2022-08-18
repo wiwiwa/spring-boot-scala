@@ -8,6 +8,7 @@ import org.apache.maven.artifact.{Artifact, DefaultArtifact}
 import org.apache.maven.execution.{DefaultMavenExecutionRequest, MavenSession}
 import org.apache.maven.project.MavenProject
 import org.springframework.boot.maven.RepackageMojo
+import os.Path
 
 import java.io._
 import java.util
@@ -35,16 +36,23 @@ trait SpringBootScalaModule extends ScalaAppModule {
     val jarPath = T.workspace / "out" / s"${artifactId()}-${publishVersion()}.jar"
     val mavenProject = new MavenProject {
       override def getArtifact = new DefaultArtifact("my.organization", artifactId(), publishVersion(), "compile", "", null, new DefaultArtifactHandler("jar"))
-      override def getArtifacts = resolvedRunIvyDeps().map(_.path)
-        .map { p =>
+      override def getArtifacts = {
+        def artifact(group:String, name:String, version:String, path:Path) = {
+          val a = new DefaultArtifact(group, name, version, "compile", "", null, new DefaultArtifactHandler(path.ext))
+          a.setFile(path.toIO)
+          a
+        }
+        val localArtifacts = unmanagedClasspath().map(_.path).map{p=> artifact("local", p.baseName, "local", p)}
+        val ivyArtifacts = resolvedRunIvyDeps().map(_.path).map{ p=>
           val List(version, name, group) = p.segments.toList.reverse match {
             case List(_,"jars",v,n,g,_*) => List(v,n,g)
             case List(_,v,n,g,_*) => List(v,n,g)
           }
-          val a = new DefaultArtifact(group, name, version, "compile", "", null, new DefaultArtifactHandler(p.ext))
-          a.setFile(p.toIO)
-          a
-        }.toSet.asJava.asInstanceOf[util.Set[Artifact]]
+          artifact(group, name, version, p)
+        }
+        (localArtifacts.iterator ++ ivyArtifacts.iterator)
+          .toSet.asJava.asInstanceOf[util.Set[Artifact]]
+      }
     }
     val mojo = new RepackageMojo{
       project = mavenProject
