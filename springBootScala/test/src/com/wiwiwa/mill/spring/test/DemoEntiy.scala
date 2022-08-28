@@ -6,9 +6,9 @@ import java.util.Date
 import javax.persistence.{Entity, Id}
 
 @Entity
-class DemoBean:
+class DemoEntiy:
   @Id
   var id: java.lang.Long = null
   var msg: String = null
 
-trait DemoBeanRepository extends JpaRepository[DemoBean, Int]
+trait DemoBeanRepository extends JpaRepository[DemoEntiy, Int]

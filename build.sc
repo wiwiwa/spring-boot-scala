@@ -1,4 +1,4 @@
-import $ivy.`com.wiwiwa::mill-spring-boot:1.8`, com.wiwiwa.mill.ScalaLibraryModule
+import $ivy.`com.wiwiwa::mill-spring-boot:1.13`, com.wiwiwa.mill.ScalaLibraryModule
 import mill._
 import mill.scalalib._
 
@@ -38,7 +38,8 @@ object springBootScala extends ScalaLibraryModule {
     ivy"com.fasterxml.jackson.module::jackson-module-scala:2.13.1",
   )
   override def compileIvyDeps = Agg(
-    ivy"org.springframework.boot:spring-boot:$springBootVersion",
+    ivy"org.springframework.boot:spring-boot-starter-web:$springBootVersion",
+    ivy"org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion",
   )
 
   object test extends Tests with TestModule.Utest {

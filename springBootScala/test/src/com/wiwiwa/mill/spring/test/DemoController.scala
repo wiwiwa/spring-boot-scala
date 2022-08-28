@@ -1,5 +1,6 @@
 package com.wiwiwa.mill.spring.test
 
+import com.wiwiwa.scaler.webquery.WebQuery
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.{GetMapping, PostMapping, RequestBody, RequestMapping, RestController}
 
@@ -11,11 +12,11 @@ class DemoController:
   @Autowired var repo: DemoBeanRepository = null
 
   @GetMapping(path = Array("/"))
-  def listDemo = repo.findAll()
+  def listDemo(query:WebQuery[DemoEntiy]) = query.execute()
   @GetMapping(path = Array("/{obj}"))
-  def showDemo(obj:DemoBean) = obj
+  def showDemo(obj:DemoEntiy) = obj
 
   @PostMapping(path = Array("/"))
-  def newDemo(@RequestBody demo:DemoBean) =
+  def newDemo(demo:DemoEntiy) =
     demo.id = new Date().getTime
     repo.save(demo)

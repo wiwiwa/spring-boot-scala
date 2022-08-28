@@ -58,12 +58,11 @@ trait MockSpringBoot:
     val req = MockMvcRequestBuilders.post(uri)
     sendRequest(uri,req,data)
   private def sendRequest(uri:String, reqBuilder:MockHttpServletRequestBuilder, data:Map[String,Any]=Map.empty): JsonResponse =
-    reqBuilder.content{
-      objectMapper.writeValueAsString(data)
-    }
     if mockSpringSession!=null then
       reqBuilder.session(mockSpringSession.asInstanceOf)
-    reqBuilder.header("CONTENT-TYPE","application/json")
+    data.foreach{ (k,v)=>
+      reqBuilder.param(k, v.toString)
+    }
     //send
     val result = mockSpringMvc.perform(reqBuilder).andReturn()
     if mockSpringSession==null then
