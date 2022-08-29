@@ -11,7 +11,10 @@ import java.util.Date
 @AutoConfigureMockMvc
 object SpringBootScalaTests extends TestSuite with MockSpringBoot :
   override def tests = Tests {
-    post("/demo/", Map("msg" -> s"hello at ${new Date()}"))
+    val date = new Date()
+    post("/demo/", Map("msg" -> s"hello at $date"))
     get("/demo/", Map("*msg*" -> "hello"))
+      .assertJson("$.content[0].id")
+    get("/demo/", Map("lastModified<" -> (date.getTime*2).toString) )
       .assertJson("$.content[0].id")
   }

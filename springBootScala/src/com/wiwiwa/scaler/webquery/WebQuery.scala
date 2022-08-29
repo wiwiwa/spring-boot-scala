@@ -4,6 +4,7 @@ import org.springframework.data.domain.{Page, Pageable}
 import org.springframework.data.jpa.repository.query.QueryUtils
 import org.springframework.data.support.PageableExecutionUtils
 
+import java.util.Date
 import javax.persistence.criteria.{CriteriaQuery, Predicate, Selection}
 import javax.persistence.EntityManager
 import javax.servlet.http.HttpServletRequest
@@ -48,13 +49,17 @@ class WebQueryImpl[T](req:HttpServletRequest, page:Pageable, entityClass:Class[T
           case '>' =>
             val fieldName = paramName.dropRight(1)
             entityClass.getDeclaredField(fieldName) match
-              case f if f == null || !classOf[Number].isAssignableFrom(f.getType) => null
-              case _ => cb.greaterThanOrEqualTo(root.get(fieldName), paramValue.toLong)
+              case f if f == null => null
+              case f if classOf[Number].isAssignableFrom(f.getType) => cb.greaterThanOrEqualTo(root.get(fieldName), paramValue.toLong)
+              case f if classOf[Date].isAssignableFrom(f.getType) => cb.greaterThanOrEqualTo(root.get(fieldName), new Date(paramValue.toLong))
+              case _ => null
           case '<' =>
             val fieldName = paramName.dropRight(1)
             entityClass.getDeclaredField(fieldName) match
-              case f if f == null || !classOf[Number].isAssignableFrom(f.getType) => null
-              case _ => cb.lessThanOrEqualTo(root.get(fieldName), paramValue.toLong)
+              case f if f == null => null
+              case f if classOf[Number].isAssignableFrom(f.getType) => cb.lessThanOrEqualTo(root.get(fieldName), paramValue.toLong)
+              case f if classOf[Date].isAssignableFrom(f.getType) => cb.lessThanOrEqualTo(root.get(fieldName), new Date(paramValue.toLong))
+              case _ => null
           case _ =>
             if paramName.head == '*' then
               val fieldName = paramName.substring(1)

@@ -19,4 +19,5 @@ class DemoController:
   @PostMapping(path = Array("/"))
   def newDemo(demo:DemoEntiy) =
     demo.id = new Date().getTime
+    demo.lastModified = new Date()
     repo.save(demo)

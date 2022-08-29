@@ -10,5 +10,6 @@ class DemoEntiy:
   @Id
   var id: java.lang.Long = null
   var msg: String = null
+  var lastModified: Date = null
 
 trait DemoBeanRepository extends JpaRepository[DemoEntiy, Int]

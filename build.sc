@@ -1,4 +1,4 @@
-import $ivy.`com.wiwiwa::mill-spring-boot:1.13`, com.wiwiwa.mill.ScalaLibraryModule
+import $ivy.`com.wiwiwa::mill-spring-boot:1.14`, com.wiwiwa.mill.ScalaLibraryModule
 import mill._
 import mill.scalalib._
 

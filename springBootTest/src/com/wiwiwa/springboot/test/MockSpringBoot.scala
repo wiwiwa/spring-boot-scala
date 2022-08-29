@@ -90,6 +90,7 @@ class JsonResponse(url:String, response: MockHttpServletResponse):
     val jsonObj: AnyRef = json(path)
     val passed = (jsonObj, expected) match
       case (null, None) => false
+      case (null, null) => true
       case (a:JSONArray, None) if a.isEmpty => false
       case (_, None) => true
       case (null, Some(v)) => v==null
