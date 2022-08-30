@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.{SpringApplication, SpringBootConfiguration}
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes
+import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.context.TestContextManager
 import org.springframework.test.web.servlet.MockMvc
@@ -21,6 +22,7 @@ import scala.jdk.CollectionConverters.*
 import scala.reflect.{ClassTag, classTag}
 
 trait MockSpringBoot:
+  val jsonRequestBody = true
   private var mockSpringMvc: MockMvc = null
   private var mockSpringSession: HttpSession = null
   private var objectMapper: ObjectMapper = null
@@ -43,26 +45,34 @@ trait MockSpringBoot:
       testContextManager.getTestContext.getApplicationContext
         .getAutowireCapableBeanFactory.asInstanceOf[DefaultListableBeanFactory]
     mockSpringMvc = beanFactory.getBean(classOf[MockMvc])
-    objectMapper = beanFactory.getBean(classOf[ObjectMapper])
+    if jsonRequestBody then
+      objectMapper = beanFactory.getBean(classOf[ObjectMapper])
     mockSpringSession = null
     beanFactory
 
-  def get(uri:String) = sendRequest(uri, MockMvcRequestBuilders.get(uri))
-  def get(uri:String, params:Map[String,String]): JsonResponse =
+  def get(uri:String, params:Map[String,String]=Map.empty): JsonResponse =
     val req = MockMvcRequestBuilders.get(uri)
-    sendRequest(uri, req, params)
+    params.foreach { (k, v) =>
+      req.param(k, v.toString)
+    }
+    sendRequest(uri, req)
   def post(uri:String, data:Array[Byte]): JsonResponse =
     val req = MockMvcRequestBuilders.post(uri).content(data)
     sendRequest(uri, req)
   def post(uri:String, data:Map[String,Any]=Map.empty): JsonResponse =
     val req = MockMvcRequestBuilders.post(uri)
-    sendRequest(uri,req,data)
-  private def sendRequest(uri:String, reqBuilder:MockHttpServletRequestBuilder, data:Map[String,Any]=Map.empty): JsonResponse =
+    if jsonRequestBody then
+      val json = objectMapper.writeValueAsString(data)
+      req.contentType(MediaType.APPLICATION_JSON)
+      req.content(json)
+    else
+      data.foreach { (k, v)=>
+        req.param(k, v.toString)
+      }
+    sendRequest(uri,req)
+  private def sendRequest(uri:String, reqBuilder:MockHttpServletRequestBuilder): JsonResponse =
     if mockSpringSession!=null then
       reqBuilder.session(mockSpringSession.asInstanceOf)
-    data.foreach{ (k,v)=>
-      reqBuilder.param(k, v.toString)
-    }
     //send
     val result = mockSpringMvc.perform(reqBuilder).andReturn()
     if mockSpringSession==null then
