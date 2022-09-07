@@ -30,7 +30,9 @@ class WebQueryImpl[T](req:HttpServletRequest, page:Pageable, entityClass:Class[T
     val cb = entityManager.getCriteriaBuilder
     val query = cb.createQuery(resultType)
     val root = query.from(entityClass)
+    val fields = entityClass.getDeclaredFields.map{f=>f.getName->f.getType}.toMap
     val predicates: List[Predicate] = req.getParameterMap.entrySet.asScala.iterator
+      .filter(_.getKey.head!='$')
       .map { e=>
         val paramName = e.getKey
         val paramValue = e.getValue()(0)
@@ -38,35 +40,36 @@ class WebQueryImpl[T](req:HttpServletRequest, page:Pageable, entityClass:Class[T
           case '*' =>
             if paramName.head == '*' then
               val fieldName = paramName.drop(1).dropRight(1)
-              entityClass.getDeclaredField(fieldName) match
-                case f if f == null || f.getType != classOf[String] => null
-                case _ => cb.like(root.get(fieldName), '%' + paramValue + '%')
+              fields.get(fieldName) match
+                case Some(c) if c==classOf[String] => cb.like(root.get(fieldName), '%' + paramValue + '%')
+                case _ => throw new IllegalArgumentException(s"Invalid field name or value for field: $fieldName")
             else
               val fieldName = paramName.dropRight(1)
-              entityClass.getDeclaredField(fieldName) match
-                case f if f == null || f.getType != classOf[String] => null
-                case _ => cb.like(root.get(fieldName), paramValue + '%')
+              fields.get(fieldName) match
+                case Some(c) if c==classOf[String] => cb.like(root.get(fieldName), paramValue + '%')
+                case _ => throw new IllegalArgumentException(s"Invalid field name or value for field: $fieldName")
           case '>' =>
             val fieldName = paramName.dropRight(1)
-            entityClass.getDeclaredField(fieldName) match
-              case f if f == null => null
-              case f if classOf[Number].isAssignableFrom(f.getType) => cb.greaterThanOrEqualTo(root.get(fieldName), paramValue.toLong)
-              case f if classOf[Date].isAssignableFrom(f.getType) => cb.greaterThanOrEqualTo(root.get(fieldName), new Date(paramValue.toLong))
-              case _ => null
+            fields.get(fieldName) match
+              case Some(c)  if classOf[Number].isAssignableFrom(c) => cb.greaterThanOrEqualTo(root.get(fieldName), paramValue.toLong)
+              case Some(c)  if classOf[Date].isAssignableFrom(c) => cb.greaterThanOrEqualTo(root.get(fieldName), new Date(paramValue.toLong))
+              case _ => throw new IllegalArgumentException(s"Invalid field name or value for field: $fieldName")
           case '<' =>
             val fieldName = paramName.dropRight(1)
-            entityClass.getDeclaredField(fieldName) match
-              case f if f == null => null
-              case f if classOf[Number].isAssignableFrom(f.getType) => cb.lessThanOrEqualTo(root.get(fieldName), paramValue.toLong)
-              case f if classOf[Date].isAssignableFrom(f.getType) => cb.lessThanOrEqualTo(root.get(fieldName), new Date(paramValue.toLong))
-              case _ => null
+            fields.get(fieldName) match
+              case Some(c)  if classOf[Number].isAssignableFrom(c) => cb.lessThanOrEqualTo(root.get(fieldName), paramValue.toLong)
+              case Some(c)  if classOf[Date].isAssignableFrom(c) => cb.lessThanOrEqualTo(root.get(fieldName), new Date(paramValue.toLong))
+              case _ => throw new IllegalArgumentException(s"Invalid field name or value for field: $fieldName")
           case _ =>
             if paramName.head == '*' then
               val fieldName = paramName.substring(1)
-              cb.like(root.get(fieldName), '%' + paramValue)
-            else cb.equal(root.get(paramName), paramValue)
-      }.filter(_ != null)
-      .toList
+              fields.get(fieldName) match
+                case Some(_) => cb.like(root.get(fieldName), '%' + paramValue)
+                case _ => throw new IllegalArgumentException(s"Invalid field name or value for field: $fieldName")
+            else fields.get(paramName) match
+              case Some(_) => cb.equal(root.get(paramName), paramValue)
+              case _ => throw new IllegalArgumentException(s"Invalid field name or value for field: $paramName")
+      }.toList
     query.where(predicates:_*)
     if pageable==null then  //count for all records
       query.select( cb.count(root).asInstanceOf[Selection[R]] )
