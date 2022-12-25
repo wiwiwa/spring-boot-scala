@@ -1,10 +1,9 @@
-import $ivy.`com.wiwiwa::mill-spring-boot:1.18`, com.wiwiwa.mill.ScalaLibraryModule
+import $ivy.`com.wiwiwa::mill-spring-boot:1.20`, com.wiwiwa.mill.ScalaLibraryModule
 import mill._
 import mill.scalalib._
 
 val springBootVersion = "3.0.1"
 val uTestVersion = "0.8.1"
-
 
 object millSpringBoot extends ScalaLibraryModule {
   def organization = "com.wiwiwa"
@@ -16,6 +15,7 @@ object millSpringBoot extends ScalaLibraryModule {
     ivy"org.springframework.boot:spring-boot-maven-plugin:$springBootVersion",
     ivy"org.apache.maven.shared:maven-common-artifact-filters:3.3.1",
     ivy"org.apache.maven:maven-core:3.8.6",
+    ivy"org.openl.jgit:org.eclipse.jgit:6.3.0.202209071007-openl-2",
   )
   override def compileIvyDeps = Agg(
     ivy"com.lihaoyi::mill-scalalib:$millVersion",
