@@ -5,9 +5,9 @@ import org.springframework.data.jpa.repository.query.QueryUtils
 import org.springframework.data.support.PageableExecutionUtils
 
 import java.util.Date
-import javax.persistence.criteria.{CriteriaQuery, Predicate, Selection}
-import javax.persistence.EntityManager
-import javax.servlet.http.HttpServletRequest
+import jakarta.persistence.criteria.{CriteriaQuery, Predicate, Selection}
+import jakarta.persistence.EntityManager
+import jakarta.servlet.http.HttpServletRequest
 import scala.jdk.CollectionConverters.*
 
 trait WebQuery[T]:

@@ -28,7 +28,7 @@ trait JavaAppModule extends JavaModule {
     implicit val pwd: os.Path = millSourcePath / os.up
     val GitLog = """(.*)\.(\d+)(.*)""".r
     val isClean = os.proc("git","status").call().out.lines.last.endsWith(" clean")
-    if(!isClean) "DEV-SNAPSHOT" else
+    if(!isClean) "SNAPSHOT" else
       os.proc("git","tag","--sort=-authordate").call().out.lines.head match {
         case GitLog(vLeft, vMinor, vRight) =>
           val isHead = os.proc("git", "show").call().out.lines.head.contains("HEAD")

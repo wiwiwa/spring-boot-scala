@@ -32,15 +32,15 @@ object MillSpringBootTest extends TestSuite with Cacher {
       Ctx.External(false), Ctx.Foreign(None), sourcecode.File(""), Caller("")
     )
     new TestSpringBootModule with SpringBootScalaModule {
-      override def scalaVersion = "3.1.0"
+      override def scalaVersion = "3.2.1"
       override def ivyDeps = T {
         val springBootVersion = classOf[Repackager].getPackage.getImplementationVersion
         super.ivyDeps() ++ Seq(
-          ivy"com.wiwiwa::spring-boot-test:1.6",
-          ivy"com.lihaoyi::utest:0.7.10",
+          ivy"com.wiwiwa::spring-boot-test:SNAPSHOT",
+          ivy"com.lihaoyi::utest:0.8.1",
           ivy"org.springframework.boot:spring-boot-starter-web:$springBootVersion",
           ivy"org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion",
-          ivy"com.h2database:h2:1.4.200",
+          ivy"com.h2database:h2:2.1.212",
           ivy"javax.xml.bind:jaxb-api:2.3.1",
         )
       }

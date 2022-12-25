@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.request.{MockHttpServletRequestBuild
 import java.io.ByteArrayInputStream
 import java.nio.charset.Charset
 import java.util
-import javax.servlet.http.HttpSession
+import jakarta.servlet.http.HttpSession
 import scala.jdk.CollectionConverters.*
 import scala.reflect.{ClassTag, classTag}
 

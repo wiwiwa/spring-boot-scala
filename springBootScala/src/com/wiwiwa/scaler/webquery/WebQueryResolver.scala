@@ -10,8 +10,8 @@ import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.{HandlerMethodArgumentResolver, ModelAndViewContainer}
 
 import java.lang.reflect.ParameterizedType
-import javax.persistence.{Entity, EntityManager}
-import javax.servlet.http.HttpServletRequest
+import jakarta.persistence.{Entity, EntityManager}
+import jakarta.servlet.http.HttpServletRequest
 import scala.jdk.CollectionConverters.*
 
 @ConditionalOnClass(Array(classOf[HandlerMethodArgumentResolver], classOf[Entity]))

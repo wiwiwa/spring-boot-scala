@@ -3,7 +3,7 @@ package com.wiwiwa.mill.spring.test
 import org.springframework.data.jpa.repository.JpaRepository
 
 import java.util.Date
-import javax.persistence.{Entity, Id}
+import jakarta.persistence.{Entity, Id}
 
 @Entity
 class DemoEntiy:
