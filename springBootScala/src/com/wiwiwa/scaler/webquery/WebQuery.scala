@@ -70,7 +70,8 @@ class WebQueryImpl[T](req:HttpServletRequest, page:Pageable, entityClass:Class[T
               case Some(_) => cb.equal(root.get(paramName), paramValue)
               case _ => throw new IllegalArgumentException(s"Invalid field name or value for field: $paramName")
       }.toList
-    query.where(predicates:_*)
+    if predicates.nonEmpty then
+      query.where(predicates:_*)
     if pageable==null then  //count for all records
       query.select( cb.count(root).asInstanceOf[Selection[R]] )
     else if pageable.getSort.isSorted then
