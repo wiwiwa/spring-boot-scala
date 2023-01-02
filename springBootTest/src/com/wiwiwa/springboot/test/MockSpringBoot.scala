@@ -70,7 +70,7 @@ trait MockSpringBoot:
         req.param(k, v.toString)
       }
     sendRequest(uri,req)
-  private def sendRequest(uri:String, reqBuilder:MockHttpServletRequestBuilder): JsonResponse =
+  def sendRequest(uri:String, reqBuilder:MockHttpServletRequestBuilder): JsonResponse =
     if mockSpringSession!=null then
       reqBuilder.session(mockSpringSession.asInstanceOf)
     //send
