@@ -22,7 +22,7 @@ import scala.jdk.CollectionConverters.*
 import scala.reflect.{ClassTag, classTag}
 
 trait MockSpringBoot:
-  val jsonRequestBody = true
+  var jsonRequestBody = true
   private var mockSpringMvc: MockMvc = null
   private var mockSpringSession: HttpSession = null
   private var objectMapper: ObjectMapper = null
