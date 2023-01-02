@@ -81,7 +81,9 @@ trait MockSpringBoot:
     if response.getStatus >= 400 then
       val msg = result.getRequest.getAttribute(classOf[DefaultErrorAttributes].getName+".ERROR") match
         case ex:Exception=> ex.getMessage
-        case _ => response.getContentAsString
+        case _ => response.getErrorMessage match
+          case null => response.getContentAsString
+          case s => s
       throw HttpStatusException(response.getStatus, uri, msg)
     new JsonResponse(uri, response)
 
