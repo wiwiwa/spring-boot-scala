@@ -17,13 +17,15 @@ import org.springframework.test.web.servlet.request.{MockHttpServletRequestBuild
 import java.io.ByteArrayInputStream
 import java.nio.charset.Charset
 import java.util
-import jakarta.servlet.http.HttpSession
+import jakarta.servlet.http.{Cookie, HttpSession}
+
 import scala.jdk.CollectionConverters.*
 import scala.reflect.{ClassTag, classTag}
 
 trait MockSpringBoot:
   var jsonRequestBody = true
   private var mockSpringMvc: MockMvc = null
+  private var mockCookies: Array[Cookie] = Array.empty
   private var mockSpringSession: HttpSession = null
   private var objectMapper: ObjectMapper = null
   private var beanFactory: DefaultListableBeanFactory = createBeanFactory()
@@ -48,6 +50,7 @@ trait MockSpringBoot:
     if jsonRequestBody then
       objectMapper = beanFactory.getBean(classOf[ObjectMapper])
     mockSpringSession = null
+    mockCookies = Array.empty
     beanFactory
 
   def get(uri:String, params:Map[String,String]=Map.empty): JsonResponse =
@@ -73,11 +76,14 @@ trait MockSpringBoot:
   def sendRequest(uri:String, reqBuilder:MockHttpServletRequestBuilder): JsonResponse =
     if mockSpringSession!=null then
       reqBuilder.session(mockSpringSession.asInstanceOf)
+    if mockCookies.nonEmpty then
+      reqBuilder.cookie( mockCookies:_* )
     //send
     val result = mockSpringMvc.perform(reqBuilder).andReturn()
-    if mockSpringSession==null then
-      mockSpringSession = result.getRequest.getSession(false)
     val response = result.getResponse
+    mockSpringSession = result.getRequest.getSession(false)
+    if response.getCookies.nonEmpty then
+      mockCookies = response.getCookies
     if response.getStatus >= 400 then
       val msg = result.getRequest.getAttribute(classOf[DefaultErrorAttributes].getName+".ERROR") match
         case ex:Exception=> ex.getMessage

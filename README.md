@@ -17,7 +17,7 @@ A Mill plugin that project the following modules:
   * Enable Scala class properties and class getter/setter as Spring bean properties
   * Provides `WebQuery[MyDomainClass]` in controller methods to dynamic query database using http query string:
     * `fied=value` to query `field` value equals to `value`
-    * `*fied*=value`,`fied*=value`,`fied*=value` to query `field` value contains, starts with, or ends with `value`
+    * `*fied*=value`,`fied*=value`,`*fied=value` to query `field` value contains, starts with, or ends with `value`
     * `fied>=value`,`fied<=value` to query `field` value greater than or equal to, less than or equal to `value`
 * Provides trait `Tests` and `SpringBootTests`. Both of them can be used as base class of test module, which:
   * Add artifact `spring-boot-test` to `ivyDeps`, which

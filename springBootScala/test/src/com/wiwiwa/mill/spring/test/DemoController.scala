@@ -1,6 +1,7 @@
 package com.wiwiwa.mill.spring.test
 
 import com.wiwiwa.scaler.webquery.WebQuery
+import jakarta.servlet.http.HttpSession
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.{GetMapping, PostMapping, RequestBody, RequestMapping, RestController}
 
@@ -21,3 +22,10 @@ class DemoController:
     demo.id = new Date().getTime
     demo.lastModified = new Date()
     repo.save(demo)
+
+  @PostMapping(path = Array("/session"))
+  def newSession(session: HttpSession) =
+    session.setAttribute("Key", "Value")
+  @GetMapping(path = Array("/session"))
+  def getSession(session: HttpSession) =
+    Map("Key" -> session.getAttribute("Key"))
