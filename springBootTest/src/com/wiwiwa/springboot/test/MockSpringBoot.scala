@@ -18,6 +18,7 @@ import java.io.ByteArrayInputStream
 import java.nio.charset.Charset
 import java.util
 import jakarta.servlet.http.{Cookie, HttpSession}
+import org.springframework.core.env.Environment
 
 import scala.jdk.CollectionConverters.*
 import scala.reflect.{ClassTag, classTag}
@@ -37,6 +38,7 @@ trait MockSpringBoot:
     bd.setInstanceSupplier(()=>beanObj)
     beanFactory.registerBeanDefinition(requiredType.getName, bd)
     beanObj
+  def property(key:String): String = bean[Environment].getProperty(key, classOf[String])
   def createBeanFactory() =
     System.setProperty("spring.profiles.active", "test")
     if !this.getClass.isAnnotationPresent(classOf[SpringBootTest]) || !this.getClass.isAnnotationPresent(classOf[AutoConfigureMockMvc]) then
