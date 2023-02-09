@@ -40,7 +40,6 @@ trait MockSpringBoot:
     beanObj
   def property(key:String): String = bean[Environment].getProperty(key, classOf[String])
   def createBeanFactory() =
-    System.setProperty("spring.profiles.active", "test")
     if !this.getClass.isAnnotationPresent(classOf[SpringBootTest]) || !this.getClass.isAnnotationPresent(classOf[AutoConfigureMockMvc]) then
       throw new RuntimeException("Test class should be marked with @SpringBootTest and @AutoConfigureMockMvc")
     beanFactory =
