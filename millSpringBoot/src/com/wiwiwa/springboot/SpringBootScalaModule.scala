@@ -2,6 +2,7 @@ package com.wiwiwa.springboot
 
 import com.wiwiwa.mill.ScalaAppModule
 import mill._
+import mill.modules.Jvm
 import mill.scalalib.DepSyntax
 import org.apache.maven.artifact.handler.DefaultArtifactHandler
 import org.apache.maven.artifact.{Artifact, DefaultArtifact}
@@ -68,6 +69,14 @@ trait SpringBootScalaModule extends ScalaAppModule {
     PathRef(jarPath)
   }
   override def artifactSuffix = ""
+  /** Also package depend module into jar  */
+  override def jar = T{
+    val paths = localClasspath() ++ transitiveLocalClasspath()
+    Jvm.createJar(
+      paths.map(_.path).filter(os.exists),
+      manifest()
+    )
+  }
 
   trait Tests extends SpringBootTests
   trait SpringBootTests extends ScalaModuleTests {
