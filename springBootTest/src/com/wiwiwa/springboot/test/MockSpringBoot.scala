@@ -23,6 +23,8 @@ import org.springframework.core.env.Environment
 import scala.jdk.CollectionConverters.*
 import scala.reflect.{ClassTag, classTag}
 
+val SPRINT_CURRENT_SESSION = "org.springframework.session.SessionRepository.CURRENT_SESSION"
+
 trait MockSpringBoot:
   var jsonRequestBody = true
   private var mockSpringMvc: MockMvc = null
@@ -75,14 +77,15 @@ trait MockSpringBoot:
       }
     sendRequest(uri,req)
   def sendRequest(uri:String, reqBuilder:MockHttpServletRequestBuilder): JsonResponse =
-    if mockSpringSession!=null then
-      reqBuilder.session(mockSpringSession.asInstanceOf)
+    if mockSpringSession != null then //save current session
+      reqBuilder.requestAttr(SPRINT_CURRENT_SESSION, mockSpringSession)
     if mockCookies.nonEmpty then
       reqBuilder.cookie( mockCookies:_* )
     //send
     val result = mockSpringMvc.perform(reqBuilder).andReturn()
     val response = result.getResponse
-    mockSpringSession = result.getRequest.getSession(false)
+    mockSpringSession = result.getRequest //load current session
+      .getAttribute(SPRINT_CURRENT_SESSION).asInstanceOf[HttpSession]
     if response.getCookies.nonEmpty then
       mockCookies = response.getCookies
     if response.getStatus >= 400 then
