@@ -2,7 +2,7 @@ import $ivy.`com.wiwiwa::mill-spring-boot:1.20`, com.wiwiwa.mill.ScalaLibraryMod
 import mill._
 import mill.scalalib._
 
-val springBootVersion = "3.0.1"
+val springBootVersion = "3.1.0"
 val uTestVersion = "0.8.1"
 
 object millSpringBoot extends ScalaLibraryModule {
@@ -35,7 +35,7 @@ object springBootScala extends ScalaLibraryModule {
   def organization = millSpringBoot.organization
   override def scalaVersion = "3.2.1"
   override def ivyDeps = Agg(
-    ivy"com.fasterxml.jackson.module::jackson-module-scala:2.14.1",
+    ivy"com.fasterxml.jackson.module::jackson-module-scala:2.15.2",
   )
   override def compileIvyDeps = Agg(
     ivy"org.springframework.boot:spring-boot-starter-web:$springBootVersion",
