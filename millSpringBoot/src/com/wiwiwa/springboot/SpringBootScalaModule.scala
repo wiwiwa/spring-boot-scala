@@ -13,7 +13,9 @@ import os.Path
 
 import java.io._
 import java.util
+import java.util.Properties
 import scala.jdk.CollectionConverters._
+import scala.util.Using
 
 /**
  * SpringBootScalaModule enables Scala support for Spring Boot framework
@@ -55,14 +57,29 @@ trait SpringBootScalaModule extends ScalaAppModule {
           .toSet.asJava.asInstanceOf[util.Set[Artifact]]
       }
     }
+    val shellScript = createShellScriptFile()
     val mojo = new RepackageMojo{
       project = mavenProject
       session = new MavenSession(null,new DefaultMavenExecutionRequest,null,project)
+      buildExecutable()
+
       override def getSourceArtifact(classifier: String) =
         new DefaultArtifact("g","a","0","","","",null){
           override def getFile = jar().path.toIO
         }
       override def getTargetFile(finalName: String, classifier: String, targetDirectory: File) = jarPath.toIO
+      def buildExecutable() = {
+        val f = this.getClass.getSuperclass.getDeclaredField("executable")
+        f.setAccessible(true)
+        f.setBoolean(this,true)
+        if(shellScript!=null){
+          val props = new Properties()
+          props.setProperty("inlinedConfScript", shellScript)
+          val f = this.getClass.getSuperclass.getDeclaredField("embeddedLaunchScriptProperties")
+          f.setAccessible(true)
+          f.set(this,props)
+        }
+      }
     }
     mojo.execute()
     println(s"Built Spring Boot jar file $jarPath")
@@ -76,6 +93,19 @@ trait SpringBootScalaModule extends ScalaAppModule {
       paths.map(_.path).filter(os.exists),
       manifest()
     )
+  }
+
+  override def prependShellScript: T[String] = ""
+  def createShellScriptFile = T{
+    val script = prependShellScript()
+    if(script.isEmpty) null else {
+      val tmp = File.createTempFile("millSpringBoot", ".sh")
+      tmp.deleteOnExit()
+      Using.resource(new FileOutputStream(tmp)) {
+        _.write(script.getBytes)
+      }
+      tmp.getPath
+    }
   }
 
   trait Tests extends SpringBootTests
