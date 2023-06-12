@@ -108,8 +108,7 @@ trait SpringBootScalaModule extends ScalaAppModule {
     }
   }
 
-  trait Tests extends SpringBootTests
-  trait SpringBootTests extends ScalaModuleTests {
+  trait SpringBootTests extends ScalaTests {
     override def ivyDeps = T{
       val springBootScalaVersion = classOf[SpringBootScalaModule].getPackage.getImplementationVersion match {
         case null => "SNAPSHOT"
