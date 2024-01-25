@@ -13,7 +13,8 @@ object SpringBootScalaTests extends TestSuite with MockSpringBoot :
   override def tests = Tests {
     val date = new Date()
     post("/demo/", Map("msg" -> s"hello at $date"))
-    get("/demo/", Map("*msg*" -> "hello"))
+    get("/demo/",Map("*baseValue*" -> "base"))
+      .assertJson("$.content[0].baseValue")
       .assertJson("$.content[0].id")
     get("/demo/", Map("lastModified<" -> (date.getTime*2).toString) )
       .assertJson("$.content[0].id")

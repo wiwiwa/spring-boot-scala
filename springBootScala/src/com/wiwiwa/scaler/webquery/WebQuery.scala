@@ -6,8 +6,10 @@ import org.springframework.data.support.PageableExecutionUtils
 
 import java.util.Date
 import jakarta.persistence.criteria.{CriteriaQuery, Predicate, Selection}
-import jakarta.persistence.EntityManager
+import jakarta.persistence.{Entity, EntityManager, MappedSuperclass}
 import jakarta.servlet.http.HttpServletRequest
+
+import java.lang.reflect.Field
 import scala.jdk.CollectionConverters.*
 
 trait WebQuery[T]:
@@ -30,7 +32,7 @@ class WebQueryImpl[T](req:HttpServletRequest, page:Pageable, entityClass:Class[T
     val cb = entityManager.getCriteriaBuilder
     val query = cb.createQuery(resultType)
     val root = query.from(entityClass)
-    val fields = entityClass.getDeclaredFields.map{f=>f.getName->f.getType}.toMap
+    val fields = allEntityAttributes(entityClass).map{f=>f.getName->f.getType}.toMap
     val predicates: List[Predicate] = req.getParameterMap.entrySet.asScala.iterator
       .filter(_.getKey.head!='$')
       .map { e=>
@@ -77,3 +79,9 @@ class WebQueryImpl[T](req:HttpServletRequest, page:Pageable, entityClass:Class[T
     else if pageable.getSort.isSorted then
         query.orderBy(QueryUtils.toOrders(pageable.getSort, root, cb))
     query
+
+  def allEntityAttributes(clazz:Class[_]): Array[Field] =
+    if clazz==null then Array.empty
+    else if clazz.isAnnotationPresent(classOf[Entity]) || clazz.isAnnotationPresent(classOf[MappedSuperclass]) then
+      clazz.getDeclaredFields ++ allEntityAttributes(clazz.getSuperclass)
+    else Array.empty
