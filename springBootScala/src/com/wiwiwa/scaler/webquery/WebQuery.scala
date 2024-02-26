@@ -66,10 +66,12 @@ class WebQueryImpl[T](req:HttpServletRequest, page:Pageable, entityClass:Class[T
             if paramName.head == '*' then
               val fieldName = paramName.substring(1)
               fields.get(fieldName) match
-                case Some(_) => cb.like(root.get(fieldName), '%' + paramValue)
+                case Some(c) if c==classOf[String] => cb.like(root.get(fieldName), '%' + paramValue)
                 case _ => throw new IllegalArgumentException(s"Invalid field name or value for field: $fieldName")
             else fields.get(paramName) match
-              case Some(_) => cb.equal(root.get(paramName), paramValue)
+              case Some(c) =>
+                val value = if c.isEnum then toEnumOrdinal(c,paramValue) else paramValue
+                cb.equal(root.get(paramName), value)
               case _ => throw new IllegalArgumentException(s"Invalid field name or value for field: $paramName")
       }.toList
     if predicates.nonEmpty then
@@ -85,3 +87,6 @@ class WebQueryImpl[T](req:HttpServletRequest, page:Pageable, entityClass:Class[T
     else if clazz.isAnnotationPresent(classOf[Entity]) || clazz.isAnnotationPresent(classOf[MappedSuperclass]) then
       clazz.getDeclaredFields ++ allEntityAttributes(clazz.getSuperclass)
     else Array.empty
+  def toEnumOrdinal(clazz:Class[_], enumValue:String): Int =
+    val e = clazz.getMethod("valueOf", classOf[String]).invoke(null,enumValue)
+    e.asInstanceOf[scala.reflect.Enum].ordinal

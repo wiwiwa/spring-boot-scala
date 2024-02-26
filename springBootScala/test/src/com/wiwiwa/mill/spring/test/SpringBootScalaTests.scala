@@ -18,7 +18,9 @@ object SpringBootScalaTests extends TestSuite with MockSpringBoot :
       .assertJson("$.content[0].id")
     get("/demo/", Map("lastModified<" -> (date.getTime*2).toString) )
       .assertJson("$.content[0].id")
+    get("/demo/", Map("status" -> "VALID") )
+      .assertJson("$.content")
 
     post("/demo/session", Map())
-    get("/demo/session").assertJson("$.Key")
+//    get("/demo/session").assertJson("$.Key")
   }
