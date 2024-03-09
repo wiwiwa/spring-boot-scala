@@ -55,12 +55,14 @@ class WebQueryImpl[T](req:HttpServletRequest, page:Pageable, entityClass:Class[T
             fields.get(fieldName) match
               case Some(c)  if classOf[Number].isAssignableFrom(c) => cb.greaterThanOrEqualTo(root.get(fieldName), paramValue.toLong)
               case Some(c)  if classOf[Date].isAssignableFrom(c) => cb.greaterThanOrEqualTo(root.get(fieldName), new Date(paramValue.toLong))
+              case Some(c)  if c.isEnum => cb.greaterThanOrEqualTo(root.get(fieldName), toEnumOrdinal(c,paramValue))
               case _ => throw new IllegalArgumentException(s"Invalid field name or value for field: $fieldName")
           case '<' =>
             val fieldName = paramName.dropRight(1)
             fields.get(fieldName) match
               case Some(c)  if classOf[Number].isAssignableFrom(c) => cb.lessThanOrEqualTo(root.get(fieldName), paramValue.toLong)
               case Some(c)  if classOf[Date].isAssignableFrom(c) => cb.lessThanOrEqualTo(root.get(fieldName), new Date(paramValue.toLong))
+              case Some(c)  if c.isEnum => cb.lessThanOrEqualTo(root.get(fieldName), toEnumOrdinal(c,paramValue))
               case _ => throw new IllegalArgumentException(s"Invalid field name or value for field: $fieldName")
           case _ =>
             if paramName.head == '*' then
